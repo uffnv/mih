@@ -25,8 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username_base = explode('@', $email)[0];
     $username = substr($username_base, 0, 45);
 
+    $agree_personal_data = isset($_POST['agree_personal_data']);
+
     if (!$first_name || !$last_name || !$email || !$phone || !$password) {
         $error = 'Все поля обязательны для заполнения!';
+    } elseif (!$agree_personal_data) {
+        $error = 'Необходимо дать согласие на обработку персональных данных.';
     } elseif ($password !== $confirm) {
         $error = 'Пароли не совпадают!';
     } elseif (strlen($password) < 6) {
@@ -118,6 +122,21 @@ require_once __DIR__ . '/includes/header.php';
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold small text-muted text-uppercase">Повтор *</label>
                                     <input type="password" name="confirm_password" class="form-control bg-light" placeholder="Повторите пароль" required>
+                                </div>
+                            </div>
+
+                            <!-- Согласие на обработку персональных данных -->
+                            <div class="mb-4 p-3 bg-light rounded-3 border">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="agree_personal_data" id="agree_personal_data" required
+                                        <?= isset($_POST['agree_personal_data']) ? 'checked' : '' ?>>
+                                    <label class="form-check-label small" for="agree_personal_data">
+                                        Я даю согласие на 
+                                        <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-warning fw-bold text-decoration-none">
+                                            <i class="bi bi-file-earmark-pdf"></i> обработку персональных данных
+                                        </a>
+                                        в соответствии с Федеральным законом №&nbsp;152-ФЗ <span class="text-danger">*</span>
+                                    </label>
                                 </div>
                             </div>
 
