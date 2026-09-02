@@ -82,25 +82,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = "Вход в кабинет";
+$page_title = "Вход в кабинет — Михаил Потапыч";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<main class="py-5">
+<main class="py-5 bg-light">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-5 col-md-7">
                 <div class="card auth-card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <div class="card-header text-center py-4 bg-warning bg-gradient border-0">
-                        <h3 class="mb-0 fw-bold text-dark">Вход</h3>
-                        <p class="mb-0 text-dark opacity-75 small">Доступ к личному кабинету</p>
+                    <div class="card-header text-center py-4 bg-dark text-white border-0">
+                        <h3 class="mb-0 fw-bold text-warning">Вход</h3>
+                        <p class="mb-0 opacity-75 small">Доступ к личному кабинету</p>
                     </div>
                     <div class="card-body p-4 p-md-5 bg-white">
                         
                         <?php if ($error): ?>
-                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <div class="alert alert-danger d-flex align-items-center rounded-3 mb-4" role="alert">
                                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                 <div><?= htmlspecialchars($error); ?></div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (isset($_GET['registered'])): ?>
+                            <div class="alert alert-success rounded-3 mb-4">
+                                <i class="bi bi-check-circle-fill me-1"></i> Регистрация успешна! Теперь вы можете войти.
                             </div>
                         <?php endif; ?>
 
@@ -108,32 +114,32 @@ require_once __DIR__ . '/includes/header.php';
                             <div class="mb-3">
                                 <label for="email" class="form-label fw-bold small text-muted text-uppercase">Email или Логин</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
-                                    <input type="text" name="email" id="email" class="form-control border-start-0 bg-light" placeholder="Введите email" required>
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                    <input type="text" name="email" id="email" class="form-control border-start-0 bg-light" placeholder="name@example.com" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                                 </div>
                             </div>
                             <div class="mb-4">
-                                <div class="d-flex justify-content-between">
-                                    <label for="password" class="form-label fw-bold small text-muted text-uppercase">Пароль</label>
-                                </div>
+                                <label for="password" class="form-label fw-bold small text-muted text-uppercase">Пароль</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" id="password" class="form-control border-start-0 bg-light" placeholder="••••••" required>
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                    <input type="password" name="password" id="password" class="form-control border-start-0 border-end-0 bg-light" placeholder="••••••••" required>
+                                    <button class="btn btn-light border border-start-0 toggle-password-btn" type="button" data-target="password" title="Показать пароль">
+                                        <i class="bi bi-eye text-muted"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-dark btn-lg fw-bold shadow-sm">Войти</button>
+                                <button type="submit" class="btn btn-warning btn-lg fw-bold rounded-pill shadow-sm">Войти</button>
                             </div>
                         </form>
 
-                        <div class="text-center">
-                            <p class="text-muted mb-0">Нет аккаунта? <a href="register.php<?= $redirect_target ? '?redirect='.$redirect_target : '' ?>" class="text-decoration-none fw-bold text-warning">Зарегистрироваться</a></p>
+                        <div class="text-center pt-3 border-top">
+                            <p class="text-muted mb-0 small">
+                                Нет аккаунта? 
+                                <a href="register.php<?= $redirect_target ? '?redirect='.$redirect_target : '' ?>" class="text-decoration-none fw-bold text-dark hover-warning">Зарегистрироваться</a>
+                            </p>
                         </div>
                     </div>
-                </div>
-                
-                <div class="text-center mt-4 text-muted small">
-                    <p>Проблемы со входом? Свяжитесь с поддержкой.</p>
                 </div>
             </div>
         </div>

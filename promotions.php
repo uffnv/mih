@@ -21,59 +21,24 @@ try {
     $promotions = [];
 }
 
-$page_title = 'Акции и Новости — Михаил Потапыч';
+$page_title = 'Акции и скидки — Михаил Потапыч';
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<style>
-    /* Стили специально для страницы акций */
-    .promo-header {
-        background: #ffc107;
-        color: #000;
-    }
-    .promo-date {
-        font-size: 0.9rem;
-        color: #666;
-    }
-    .discount-badge-lg {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: #dc3545;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 50%;
-        font-weight: bold;
-        font-size: 1.2rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        z-index: 2;
-        transform: rotate(15deg);
-    }
-    .promo-card-item {
-        transition: transform 0.2s;
-        border: 1px solid #ffeeba;
-    }
-    .promo-card-item:hover {
-        transform: scale(1.01);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        border-color: #ffc107;
-    }
-</style>
-
-<main>
+<main class="bg-light">
     <!-- Заголовок страницы -->
-    <div class="promo-header py-5 mb-5">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold">Акции и Специальные предложения</h1>
-            <p class="lead">Лучшие цены на тепло и уют в вашем доме</p>
+    <div class="hero-gradient text-white py-5">
+        <div class="container text-center py-3">
+            <h1 class="display-5 fw-bold text-uppercase mb-2">Акции и <span class="text-warning">Скидки</span></h1>
+            <p class="lead text-white-50 mb-0">Лучшие предложения на отопительное оборудование и монтаж</p>
         </div>
     </div>
 
-    <div class="container mb-5">
+    <div class="container py-5">
         <!-- Хлебные крошки -->
         <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php" class="text-warning text-decoration-none">Главная</a></li>
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="index.php">Главная</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Акции</li>
             </ol>
         </nav>
@@ -82,55 +47,56 @@ require_once __DIR__ . '/includes/header.php';
             <div class="row g-4">
                 <?php foreach ($promotions as $promo): ?>
                     <div class="col-lg-6" id="promo-<?= $promo['id']; ?>">
-                        <div class="card h-100 shadow-sm promo-card-item overflow-hidden">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-hover bg-white">
                             <div class="row g-0 h-100">
                                 <!-- Изображение акции -->
-                                <div class="col-md-5 position-relative">
+                                <div class="col-md-5 position-relative bg-light">
                                     <?php if (!empty($promo['discount_percent'])): ?>
-                                        <div class="discount-badge-lg">
+                                        <span class="position-absolute top-0 start-0 m-3 badge bg-danger fs-6 px-3 py-2 rounded-pill shadow-sm" style="z-index: 5;">
                                             -<?= htmlspecialchars($promo['discount_percent']); ?>%
-                                        </div>
+                                        </span>
                                     <?php endif; ?>
                                     
                                     <?php if (!empty($promo['image_path'])): ?>
                                         <img src="<?= htmlspecialchars($promo['image_path']); ?>" 
-                                             class="img-fluid h-100 w-100" 
+                                             class="img-fluid h-100 w-100 object-fit-cover" 
                                              alt="<?= htmlspecialchars($promo['title']); ?>"
-                                             style="object-fit: cover; min-height: 250px;">
+                                             style="min-height: 240px;"
+                                             onerror="this.src='images/hero-bg.jpg'">
                                     <?php else: ?>
-                                        <div class="bg-warning h-100 d-flex align-items-center justify-content-center" style="min-height: 250px;">
-                                            <i class="bi bi-gift fs-1 text-white"></i>
+                                        <div class="bg-gradient-primary h-100 d-flex align-items-center justify-content-center" style="min-height: 240px;">
+                                            <i class="bi bi-gift-fill display-4 text-white opacity-75"></i>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                                 
                                 <!-- Контент акции -->
                                 <div class="col-md-7">
-                                    <div class="card-body d-flex flex-column h-100">
+                                    <div class="card-body d-flex flex-column p-4 h-100">
                                         <div class="mb-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-calendar-event"></i> 
-                                                Добавлено: <?= date('d.m.Y', strtotime($promo['created_at'])); ?>
+                                            <small class="text-muted d-flex align-items-center gap-1">
+                                                <i class="bi bi-calendar3 text-warning"></i> 
+                                                <?= date('d.m.Y', strtotime($promo['created_at'])); ?>
                                             </small>
                                         </div>
                                         
-                                        <h3 class="card-title h4 fw-bold mb-3">
+                                        <h4 class="card-title fw-bold mb-3 text-dark">
                                             <?= htmlspecialchars($promo['title']); ?>
-                                        </h3>
+                                        </h4>
                                         
-                                        <div class="card-text mb-4 flex-grow-1">
+                                        <div class="card-text text-muted small mb-4 flex-grow-1 lh-base">
                                             <?= nl2br(htmlspecialchars($promo['description'])); ?>
                                         </div>
 
                                         <?php if (!empty($promo['end_date'])): ?>
-                                            <div class="alert alert-warning py-2 mb-3">
-                                                <i class="bi bi-stopwatch"></i> 
-                                                Акция действует до: <strong><?= date('d.m.Y', strtotime($promo['end_date'])); ?></strong>
+                                            <div class="alert alert-warning py-2 px-3 mb-3 small rounded-3 d-flex align-items-center gap-2">
+                                                <i class="bi bi-clock-history text-dark"></i> 
+                                                <span>Действует до: <strong><?= date('d.m.Y', strtotime($promo['end_date'])); ?></strong></span>
                                             </div>
                                         <?php endif; ?>
 
-                                        <a href="catalog.php" class="btn btn-warning w-100 mt-auto fw-bold">
-                                            Перейти к покупкам
+                                        <a href="catalog.php" class="btn btn-warning w-100 mt-auto fw-bold rounded-pill shadow-sm">
+                                            В каталог по акции <i class="bi bi-arrow-right ms-1"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -140,11 +106,13 @@ require_once __DIR__ . '/includes/header.php';
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <div class="text-center py-5">
-                <div class="display-1 text-muted mb-3">😕</div>
-                <h3>Акции пока отсутствуют</h3>
-                <p class="text-muted">Загляните к нам позже, мы обязательно придумаем что-то выгодное!</p>
-                <a href="index.php" class="btn btn-warning mt-3">Вернуться на главную</a>
+            <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-3 bg-white">
+                <i class="bi bi-tag-fill display-3 text-muted opacity-50 mb-3"></i>
+                <h3 class="fw-bold">Активных акций пока нет</h3>
+                <p class="text-muted mb-4">Следите за обновлениями, скоро мы подготовим новые скидки!</p>
+                <div>
+                    <a href="catalog.php" class="btn btn-warning fw-bold px-4 py-2 rounded-pill">Перейти в каталог</a>
+                </div>
             </div>
         <?php endif; ?>
     </div>

@@ -16,7 +16,7 @@ $total_products = $stmt->fetchColumn();
 $stmt = $pdo->query("SELECT COUNT(*) FROM reviews WHERE is_approved = 0");
 $pending_reviews = $stmt->fetchColumn();
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+$stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer' OR role = 'user'");
 $users_count = $stmt->fetchColumn();
 
 // Последние заказы

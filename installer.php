@@ -2,114 +2,167 @@
 session_start();
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
+$page_title = htmlspecialchars($installer['first_name'] . ' ' . $installer['last_name']) . ' — Мастер';
 require_once __DIR__ . '/includes/header.php';
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($id <= 0) { echo "<script>location.href='installers.php';</script>"; exit; }
-
-$stmt = $pdo->prepare("SELECT * FROM installers WHERE id = ?");
-$stmt->execute([$id]);
-$installer = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$installer) { echo "<div class='container py-5'>Мастер не найден</div>"; exit; }
-
-$stmt = $pdo->prepare("SELECT * FROM installer_portfolio WHERE installer_id = ? ORDER BY created_at DESC");
-$stmt->execute([$id]);
-$portfolio = $stmt->fetchAll();
-
-// Обработка отзыва
-$msg = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
-    if (!isset($_SESSION['user_id'])) $msg = "Нужна авторизация";
-    else {
-        $r = (int)$_POST['rating'];
-        $c = trim($_POST['comment']);
-        // Проверка рейтинга
-        if($r < 1) $r = 1; 
-        if($r > 5) $r = 5;
-
-        $pdo->prepare("INSERT INTO installer_reviews (installer_id, user_id, rating, comment, created_at) VALUES (?,?,?,?, NOW())")->execute([$id, $_SESSION['user_id'], $r, $c]);
-        $msg = "Отзыв добавлен!";
-    }
-}
-
-// Отзывы
-$stmt = $pdo->prepare("SELECT r.*, u.username, u.first_name, u.last_name FROM installer_reviews r JOIN users u ON r.user_id = u.id WHERE r.installer_id = ? ORDER BY r.created_at DESC");
-$stmt->execute([$id]);
-$reviews = $stmt->fetchAll();
+$photo = !empty($installer['photo']) ? 'images/installers/' . $installer['photo'] : '';
+if (!empty($installer['photo_path'])) $photo = $installer['photo_path'];
+$photo = str_replace('../', '', $photo);
+$hasPhoto = !empty($photo) && file_exists(__DIR__ . '/' . $photo);
 ?>
 
-<main class="py-5 bg-light">
+<main class="py-4 py-lg-5 bg-light">
     <div class="container">
+        <!-- Хлебные крошки -->
         <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="installers.php" class="text-dark">Мастера</a></li>
-                <!-- ИСПРАВЛЕНО: Имя Фамилия -->
-                <li class="breadcrumb-item active"><?= htmlspecialchars($installer['first_name'] . ' ' . $installer['last_name']) ?></li>
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="index.php">Главная</a></li>
+                <li class="breadcrumb-item"><a href="installers.php">Монтажники</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($installer['first_name'] . ' ' . $installer['last_name']) ?></li>
             </ol>
         </nav>
 
         <div class="row g-4">
+            <!-- Левая колонка - Карточка мастера -->
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body text-center">
-                        <?php if($installer['photo']): ?>
-                            <img src="images/installers/<?= $installer['photo'] ?>" class="rounded-circle mb-3" width="150" height="150" style="object-fit:cover">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white mb-4 sticky-lg-top" style="top: 85px; z-index: 10;">
+                    <div class="mb-3 mx-auto" style="width: 140px; height: 140px;">
+                        <?php if ($hasPhoto): ?>
+                            <img src="<?= htmlspecialchars($photo) ?>" 
+                                 class="rounded-circle shadow-sm border border-3 border-warning w-100 h-100 object-fit-cover" 
+                                 alt="<?= htmlspecialchars($installer['first_name']) ?>">
                         <?php else: ?>
-                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white" style="width:150px;height:150px;font-size:3rem">
-                                <?= mb_substr($installer['first_name'], 0, 1) ?>
+                            <div class="rounded-circle bg-dark text-warning d-flex align-items-center justify-content-center shadow-sm border border-3 border-warning w-100 h-100 fs-1 fw-bold">
+                                <?= mb_substr($installer['first_name'], 0, 1) . mb_substr($installer['last_name'], 0, 1) ?>
                             </div>
                         <?php endif; ?>
-                        
-                        <!-- ИСПРАВЛЕНО: Имя Фамилия -->
-                        <h4 class="fw-bold"><?= htmlspecialchars($installer['first_name'] . ' ' . $installer['last_name']) ?></h4>
-                        
-                        <p class="text-muted"><?= htmlspecialchars($installer['specialization']) ?></p>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-1 text-dark"><?= htmlspecialchars($installer['first_name'] . ' ' . $installer['last_name']) ?></h4>
+                    <p class="text-muted small mb-3"><?= htmlspecialchars($installer['specialization'] ?? 'Мастер по монтажу') ?></p>
+                    
+                    <hr class="my-3">
+
+                    <div class="text-start small">
+                        <?php if (!empty($installer['city'])): ?>
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <i class="bi bi-geo-alt-fill text-warning fs-6"></i>
+                                <span><strong>Город:</strong> <?= htmlspecialchars($installer['city']) ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($installer['experience_years'])): ?>
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <i class="bi bi-award-fill text-warning fs-6"></i>
+                                <span><strong>Опыт работы:</strong> <?= htmlspecialchars($installer['experience_years']) ?> лет</span>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($installer['phone'])): ?>
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <i class="bi bi-telephone-fill text-warning fs-6"></i>
+                                <span><strong>Телефон:</strong> <?= htmlspecialchars($installer['phone']) ?></span>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
             
+            <!-- Правая колонка - Описание, Портфолио, Отзывы -->
             <div class="col-lg-8">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5>О мастере</h5>
-                        <p><?= nl2br(htmlspecialchars($installer['description'])) ?></p>
+                <!-- О мастере -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                    <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                        <i class="bi bi-info-circle-fill text-warning me-2"></i>О специалисте
+                    </h5>
+                    <div class="text-muted lh-lg">
+                        <?= !empty($installer['description']) ? nl2br(htmlspecialchars($installer['description'])) : 'Информация о мастере уточняется.' ?>
                     </div>
                 </div>
-                
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5>Отзывы (<?= count($reviews) ?>)</h5>
-                        <?php if($msg) echo "<div class='alert alert-success'>$msg</div>"; ?>
-                        
-                        <div class="mb-4">
-                            <?php foreach($reviews as $rev): ?>
-                                <div class="border-bottom pb-2 mb-2">
-                                    <div class="d-flex justify-content-between">
-                                        <strong><?= htmlspecialchars($rev['first_name'] ? $rev['first_name'] : $rev['username']) ?></strong>
-                                        <div class="text-warning"><?= str_repeat('★', $rev['rating']) ?></div>
-                                    </div>
-                                    <p class="mb-0 text-muted"><?= htmlspecialchars($rev['comment']) ?></p>
+
+                <!-- Портфолио работ -->
+                <?php if (!empty($portfolio)): ?>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                        <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                            <i class="bi bi-images text-warning me-2"></i>Примеры выполненных работ
+                        </h5>
+                        <div class="row g-2">
+                            <?php foreach ($portfolio as $item): 
+                                $pImg = str_replace('../', '', $item['image_path']);
+                            ?>
+                                <div class="col-6 col-md-4">
+                                    <a href="<?= htmlspecialchars($pImg) ?>" class="glightbox" data-gallery="installer-portfolio">
+                                        <div class="ratio ratio-4x3 rounded-3 overflow-hidden border card-hover">
+                                            <img src="<?= htmlspecialchars($pImg) ?>" class="w-100 h-100 object-fit-cover" alt="Работа">
+                                        </div>
+                                    </a>
                                 </div>
                             <?php endforeach; ?>
                         </div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Отзывы -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <h5 class="fw-bold mb-3 text-dark border-bottom pb-2 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-chat-quote-fill text-warning me-2"></i>Отзывы клиентов</span>
+                        <span class="badge bg-warning text-dark"><?= count($reviews) ?></span>
+                    </h5>
 
-                        <?php if(isset($_SESSION['user_id'])): ?>
-                            <form method="POST" class="bg-light p-3 rounded">
-                                <h6 class="fw-bold">Оставить отзыв</h6>
-                                <!-- ИСПРАВЛЕНО: Все оценки от 1 до 5 -->
-                                <select name="rating" class="form-select mb-2 w-auto">
-                                    <option value="5">5 - Отлично</option>
-                                    <option value="4">4 - Хорошо</option>
-                                    <option value="3">3 - Нормально</option>
-                                    <option value="2">2 - Плохо</option>
-                                    <option value="1">1 - Ужасно</option>
-                                </select>
-                                <textarea name="comment" class="form-control mb-2" required placeholder="Ваш отзыв"></textarea>
-                                <button name="submit_review" class="btn btn-warning fw-bold">Отправить</button>
-                            </form>
+                    <?php if ($msg): ?>
+                        <div class="alert alert-success rounded-3 mb-4 d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                            <span><?= htmlspecialchars($msg) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="mb-4">
+                        <?php if (!empty($reviews)): ?>
+                            <?php foreach ($reviews as $rev): ?>
+                                <div class="p-3 bg-light rounded-3 mb-3 border">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong class="text-dark"><?= htmlspecialchars($rev['first_name'] ? ($rev['first_name'] . ' ' . $rev['last_name']) : $rev['username']) ?></strong>
+                                        <div class="text-warning small">
+                                            <?php 
+                                                for ($i = 1; $i <= 5; $i++) {
+                                                    echo $i <= $rev['rating'] ? '<i class="bi bi-star-fill"></i> ' : '<i class="bi bi-star"></i> ';
+                                                }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0 text-muted small"><?= nl2br(htmlspecialchars($rev['comment'])) ?></p>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted small py-3">Отзывов пока нет. Будьте первым, кто оставит отзыв о мастере!</p>
                         <?php endif; ?>
                     </div>
+
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <form method="POST" class="p-3 bg-light rounded-4 border">
+                            <h6 class="fw-bold mb-3 text-dark">Оставить отзыв о мастере</h6>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted fw-bold">Ваша оценка:</label>
+                                <select name="rating" class="form-select form-select-sm w-auto rounded-pill bg-white">
+                                    <option value="5">★★★★★ 5 - Отлично</option>
+                                    <option value="4">★★★★☆ 4 - Хорошо</option>
+                                    <option value="3">★★★☆☆ 3 - Нормально</option>
+                                    <option value="2">★★☆☆☆ 2 - Плохо</option>
+                                    <option value="1">★☆☆☆☆ 1 - Ужасно</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <textarea name="comment" class="form-control bg-white" rows="3" required placeholder="Опишите ваши впечатления от выполненной работы..."></textarea>
+                            </div>
+                            <button name="submit_review" class="btn btn-warning fw-bold px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-send-fill me-1"></i> Опубликовать отзыв
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <div class="p-3 bg-light rounded-3 text-center border">
+                            <small class="text-muted">Чтобы оставить отзыв, пожалуйста, <a href="login.php" class="fw-bold text-dark hover-warning">войдите в аккаунт</a>.</small>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -117,11 +117,21 @@ require_once __DIR__ . '/includes/header.php';
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold small text-muted text-uppercase">Пароль *</label>
-                                    <input type="password" name="password" class="form-control bg-light" placeholder="Мин. 6 символов" required>
+                                    <div class="input-group">
+                                        <input type="password" name="password" id="reg-password" class="form-control bg-light" placeholder="Мин. 6 символов" required>
+                                        <button class="btn btn-light border toggle-password-btn" type="button" data-target="reg-password" title="Показать">
+                                            <i class="bi bi-eye text-muted"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold small text-muted text-uppercase">Повтор *</label>
-                                    <input type="password" name="confirm_password" class="form-control bg-light" placeholder="Повторите пароль" required>
+                                    <div class="input-group">
+                                        <input type="password" name="confirm_password" id="reg-confirm" class="form-control bg-light" placeholder="Повторите пароль" required>
+                                        <button class="btn btn-light border toggle-password-btn" type="button" data-target="reg-confirm" title="Показать">
+                                            <i class="bi bi-eye text-muted"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -141,12 +151,15 @@ require_once __DIR__ . '/includes/header.php';
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm">Создать аккаунт</button>
+                                <button type="submit" class="btn btn-warning btn-lg fw-bold rounded-pill shadow-sm">Создать аккаунт</button>
                             </div>
                         </form>
 
                         <div class="text-center mt-4 pt-3 border-top">
-                            <p class="text-muted mb-0">Уже есть аккаунт? <a href="login.php<?= $redirect_target ? '?redirect='.$redirect_target : '' ?>" class="text-decoration-none fw-bold text-dark">Войти</a></p>
+                            <p class="text-muted mb-0 small">
+                                Уже есть аккаунт? 
+                                <a href="login.php<?= $redirect_target ? '?redirect='.$redirect_target : '' ?>" class="text-decoration-none fw-bold text-dark hover-warning">Войти</a>
+                            </p>
                         </div>
                     </div>
                 </div>
