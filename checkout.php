@@ -221,7 +221,7 @@ require_once __DIR__ . '/includes/header.php';
                                                 <input class="form-check-input" type="radio" name="delivery_method" id="del1" value="pickup" checked onchange="toggleAddress(false)">
                                                 <label class="form-check-label fw-bold d-block" for="del1">
                                                     Самовывоз (Бесплатно)
-                                                    <span class="d-block small text-muted fw-normal">Республика Алтай, с. Майма, ул. Ленина, д. 1/1, Офис 4</span>
+                                                    <span class="d-block small text-muted fw-normal">с. Майма (ул. Ленина, 1/1) или г. Горно-Алтайск (ТЦ «Кристалл»)</span>
                                                 </label>
                                             </div>
                                         </div>

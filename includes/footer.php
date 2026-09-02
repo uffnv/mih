@@ -15,16 +15,24 @@
                 </div>
                 <p class="text-white-50 small pe-lg-4">
                     Производство и продажа отопительного оборудования, печей и котлов. 
-                    Профессиональный монтаж и официальная гарантия качества.
+                    Профессиональный монтаж и официальная гарантия качества с 1995 года.
                 </p>
                 <div class="small text-white-50 mb-3">
                     <div><strong>ИНН:</strong> 0411174476 | <strong>ОГРН:</strong> 1150411003808</div>
                     <div><strong>Ген. директор:</strong> Папин М. Н.</div>
                 </div>
-                <div class="d-flex gap-3 mt-2">
-                    <a href="https://t.me" target="_blank" class="text-white-50 fs-5 hover-warning" title="Telegram"><i class="bi bi-telegram"></i></a>
-                    <a href="https://wa.me/79136914443" target="_blank" class="text-white-50 fs-5 hover-warning" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                    <a href="https://youtube.com" target="_blank" class="text-white-50 fs-5 hover-warning" title="YouTube"><i class="bi bi-youtube"></i></a>
+                <!-- Связь и мессенджер MAX -->
+                <div class="d-flex align-items-center gap-3 mt-3">
+                    <a href="https://t.me" target="_blank" class="text-white-50 fs-5 hover-warning text-decoration-none" title="Telegram">
+                        <i class="bi bi-telegram"></i>
+                    </a>
+                    <!-- Иконка MAX -->
+                    <a href="#" class="hover-scale text-decoration-none" title="Мессенджер MAX">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32" fill="none" class="shadow-sm rounded-3">
+                            <rect width="32" height="32" rx="8" fill="#ffc107"/>
+                            <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#111827" letter-spacing="0.5">MAX</text>
+                        </svg>
+                    </a>
                 </div>
             </div>
 
@@ -37,17 +45,20 @@
                     <li class="mb-2"><a href="installers.php" class="text-decoration-none text-white-50 hover-white">Наши монтажники</a></li>
                     <li class="mb-2"><a href="reviews.php" class="text-decoration-none text-white-50 hover-white">Отзывы клиентов</a></li>
                     <li class="mb-2"><a href="about.php" class="text-decoration-none text-white-50 hover-white">О компании и реквизиты</a></li>
-                    <li class="mb-2"><a href="contacts.php" class="text-decoration-none text-white-50 hover-white">Контакты и адрес</a></li>
+                    <li class="mb-2"><a href="contacts.php" class="text-decoration-none text-white-50 hover-white">Контакты и магазины</a></li>
                 </ul>
             </div>
 
             <!-- Контакты и Документы -->
             <div class="col-lg-4 col-md-6">
-                <h6 class="text-warning fw-bold mb-3 text-uppercase">Контакты</h6>
+                <h6 class="text-warning fw-bold mb-3 text-uppercase">Контакты и адреса</h6>
                 <ul class="list-unstyled text-white-50 small mb-3">
                     <li class="mb-2 d-flex align-items-start">
                         <i class="bi bi-geo-alt-fill text-warning me-2 fs-6 mt-1"></i>
-                        <span>649100, Республика Алтай, Майминский р-н, с. Майма, ул. Ленина, д. 1/1, Офис 4</span>
+                        <div>
+                            <div><strong>с. Майма:</strong> ул. Ленина, д. 1/1 (офис и склад)</div>
+                            <div><strong>г. Горно-Алтайск:</strong> ул. Чорос-Гуркина, 9А (ТЦ «Кристалл»)</div>
+                        </div>
                     </li>
                     <li class="mb-2 d-flex align-items-center">
                         <i class="bi bi-telephone-fill text-warning me-2 fs-6"></i>
