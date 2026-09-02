@@ -64,6 +64,43 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <!-- ЮРИДИЧЕСКИЕ ДАННЫЕ ОРГАНИЗАЦИИ -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 border-bottom pb-3 mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark">
+                        <i class="bi bi-patch-check-fill text-warning me-2"></i>Официальное юридическое лицо
+                    </h4>
+                    <p class="text-muted small mb-0">Все сделки и гарантийные обязательства осуществляются официально</p>
+                </div>
+                <span class="badge bg-dark text-warning px-3 py-2 rounded-pill fs-6">ООО «МП ТЕРРИТОРИЯ ТЕПЛА»</span>
+            </div>
+            
+            <div class="row g-3 small">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 h-100 border">
+                        <div class="text-muted mb-1">Руководство:</div>
+                        <div class="fw-bold text-dark">Генеральный директор</div>
+                        <div>Папин Михаил Николаевич</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 h-100 border">
+                        <div class="text-muted mb-1">Регистрационные данные:</div>
+                        <div><strong>ИНН:</strong> 0411174476</div>
+                        <div><strong>КПП:</strong> 041101001</div>
+                        <div><strong>ОГРН:</strong> 1150411003808</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 h-100 border">
+                        <div class="text-muted mb-1">Местонахождение:</div>
+                        <div class="text-dark">649100, Республика Алтай, Майминский р-н, с. Майма, ул. Ленина, д. 1/1, Офис 4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- БЛОК С ДОКУМЕНТАМИ -->
         <div id="documents" class="pt-4 mt-4">
             <div class="text-center mb-4">

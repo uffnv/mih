@@ -74,9 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username_base = explode('@', $email)[0];
         $username = substr($username_base, 0, 45);
 
+        $personal_data_agreed = isset($_POST['personal_data_agreed']) ? 1 : 0;
+
         if (!$first_name || !$last_name || !$email || !$phone || !$password) {
             $error = 'Все поля обязательны для заполнения!';
         } 
+        elseif (!$personal_data_agreed) {
+            $error = 'Необходимо согласие на обработку персональных данных (152-ФЗ)!';
+        }
         elseif ($password !== $confirm) {
             $error = 'Пароли не совпадают!';
         } 
@@ -84,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Пароль должен содержать минимум 6 символов.';
         } 
         else {
-            $result = registerUser($username, $email, $password, $first_name, $last_name, $phone, 'customer');
+            $result = registerUser($username, $email, $password, $first_name, $last_name, $phone, 'customer', 1);
             
             if ($result['success']) {
                 $user = loginUser($email, $password);
@@ -244,6 +249,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <label for="confirm_password" class="form-label fw-bold small text-uppercase text-muted">Повтор *</label>
                                         <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Повторите пароль" required>
                                     </div>
+                                </div>
+
+                                <div class="mb-3 form-check small">
+                                    <input type="checkbox" class="form-check-input" id="personal_data_agreed" name="personal_data_agreed" required checked>
+                                    <label class="form-check-label text-muted" for="personal_data_agreed">
+                                        Я согласен на <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-dark fw-bold text-decoration-underline">обработку персональных данных</a> (152-ФЗ)
+                                    </label>
                                 </div>
 
                                 <div class="d-grid gap-2">

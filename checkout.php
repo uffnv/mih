@@ -221,7 +221,7 @@ require_once __DIR__ . '/includes/header.php';
                                                 <input class="form-check-input" type="radio" name="delivery_method" id="del1" value="pickup" checked onchange="toggleAddress(false)">
                                                 <label class="form-check-label fw-bold d-block" for="del1">
                                                     Самовывоз (Бесплатно)
-                                                    <span class="d-block small text-muted fw-normal">г. Горно-Алтайск, ул. Ленина, 123</span>
+                                                    <span class="d-block small text-muted fw-normal">Республика Алтай, с. Майма, ул. Ленина, д. 1/1, Офис 4</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -283,6 +283,13 @@ require_once __DIR__ . '/includes/header.php';
                         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
                             <label class="form-label small fw-bold text-muted text-uppercase">Комментарий к заказу</label>
                             <textarea name="comment" class="form-control bg-light" rows="2" placeholder="Пожелания по времени доставки, этаж, домофон..."></textarea>
+                        </div>
+
+                        <div class="mb-3 px-2 text-center text-muted small">
+                            Нажимая «Подтвердить заказ», вы соглашаетесь на 
+                            <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-dark fw-bold text-decoration-underline">
+                                обработку персональных данных
+                            </a> в соответствии с 152-ФЗ
                         </div>
 
                         <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold py-3 rounded-pill shadow-sm fs-5">

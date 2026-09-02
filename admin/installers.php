@@ -1,6 +1,5 @@
 <?php
 require_once '../includes/config.php';
-require_once 'admin_header.php';
 
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
@@ -8,71 +7,122 @@ if (isset($_GET['delete'])) {
     header("Location: installers.php?msg=deleted");
     exit;
 }
+if (isset($_GET['restore'])) {
+    $id = (int)$_GET['restore'];
+    $pdo->prepare("UPDATE installers SET is_active = 1 WHERE id = ?")->execute([$id]);
+    header("Location: installers.php?msg=restored");
+    exit;
+}
+
+$page_title = 'Управление мастерами';
+require_once 'admin_header.php';
 
 $stmt = $pdo->query("SELECT * FROM installers ORDER BY id DESC");
-$installers = $stmt->fetchAll();
+$installers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Монтажники</h1>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-0">Монтажники (<?= count($installers) ?>)</h1>
+        <small class="text-muted">База сертифицированных специалистов по монтажу отопления</small>
+    </div>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="installer_edit.php" class="btn btn-success">
-            <i class="bi bi-person-plus-fill"></i> Добавить мастера
+        <a href="installer_edit.php" class="btn btn-warning fw-bold rounded-pill shadow-sm px-3">
+            <i class="bi bi-person-plus-fill me-1"></i> Добавить мастера
         </a>
     </div>
 </div>
 
-<?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted'): ?>
-    <div class="alert alert-success alert-dismissible fade show">
-        Мастер удален (скрыт).
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+<?php if (isset($_GET['msg'])): ?>
+    <?php if ($_GET['msg'] === 'deleted'): ?>
+        <div class="alert alert-warning alert-dismissible fade show rounded-4 mb-4" role="alert">
+            <i class="bi bi-info-circle me-2"></i> Мастер скрыт из публичного каталога.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php elseif ($_GET['msg'] === 'restored'): ?>
+        <div class="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+            <i class="bi bi-check-circle me-2"></i> Мастер активирован.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 <?php endif; ?>
 
-<div class="card">
+<div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 50px;">ID</th>
-                        <th style="width: 60px;">Фото</th>
-                        <th>Имя</th>
-                        <th>Телефон</th>
-                        <th>Рейтинг</th>
-                        <th>Статус</th>
-                        <th class="text-end">Действия</th>
+                        <th class="ps-3 py-3" style="width: 50px;">ID</th>
+                        <th class="py-3" style="width: 60px;">Фото</th>
+                        <th class="py-3">Специалист</th>
+                        <th class="py-3">Телефон</th>
+                        <th class="py-3">Рейтинг</th>
+                        <th class="py-3">Статус</th>
+                        <th class="text-end pe-3 py-3">Действия</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($installers as $inst): ?>
-                    <tr>
-                        <td><?= $inst['id']; ?></td>
-                        <td>
-                            <?php if (!empty($inst['photo_path'])): ?>
-                                <img src="<?= htmlspecialchars($inst['photo_path']); ?>" class="rounded-circle object-fit-cover" width="40" height="40" alt="">
-                            <?php else: ?>
-                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center text-muted" style="width: 40px; height: 40px;"><i class="bi bi-person"></i></div>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <div class="fw-bold"><?= htmlspecialchars($inst['first_name'] . ' ' . $inst['last_name']); ?></div>
-                            <small class="text-muted"><?= htmlspecialchars($inst['specialization'] ?? ''); ?></small>
-                        </td>
-                        <td class="text-nowrap"><?= htmlspecialchars($inst['phone']); ?></td>
-                        <td>
-                            <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> <?= number_format($inst['average_rating'] ?? 0, 1); ?></span>
-                            <small class="text-muted">(<?= $inst['review_count'] ?? 0; ?>)</small>
-                        </td>
-                        <td>
-                            <?= $inst['is_active'] ? '<span class="badge bg-success">Активен</span>' : '<span class="badge bg-secondary">Скрыт</span>'; ?>
-                        </td>
-                        <td class="text-end text-nowrap">
-                            <a href="installer_edit.php?id=<?= $inst['id']; ?>" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></a>
-                            <a href="installers.php?delete=<?= $inst['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?');"><i class="bi bi-trash"></i></a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                    <?php if (!empty($installers)): ?>
+                        <?php foreach ($installers as $inst): 
+                            $photo = $inst['photo_path'];
+                            if ($photo) $photo = str_replace('../', '', $photo);
+                            $photo_src = (!empty($photo) && file_exists(__DIR__ . '/../' . $photo)) ? '../' . $photo : '';
+                        ?>
+                        <tr>
+                            <td class="ps-3 fw-bold text-dark">#<?= $inst['id']; ?></td>
+                            <td>
+                                <?php if (!empty($photo_src)): ?>
+                                    <img src="<?= htmlspecialchars($photo_src); ?>" class="rounded-circle object-fit-cover border shadow-sm" width="44" height="44" alt="">
+                                <?php else: ?>
+                                    <div class="bg-warning bg-opacity-10 text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold border" style="width: 44px; height: 44px;">
+                                        <?= mb_substr($inst['first_name'] ?? 'М', 0, 1) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark"><?= htmlspecialchars($inst['first_name'] . ' ' . $inst['last_name']); ?></div>
+                                <small class="text-muted"><?= htmlspecialchars($inst['specialization'] ?? 'Монтаж систем отопления'); ?></small>
+                            </td>
+                            <td class="text-nowrap">
+                                <a href="tel:<?= htmlspecialchars($inst['phone']); ?>" class="text-decoration-none text-dark fw-bold small">
+                                    <?= htmlspecialchars($inst['phone']); ?>
+                                </a>
+                            </td>
+                            <td>
+                                <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> <?= number_format($inst['average_rating'] ?? 5, 1); ?></span>
+                                <small class="text-muted">(<?= $inst['review_count'] ?? 0; ?>)</small>
+                            </td>
+                            <td>
+                                <?= $inst['is_active'] ? 
+                                    '<span class="badge bg-success rounded-pill px-2">Активен</span>' : 
+                                    '<span class="badge bg-secondary rounded-pill px-2">Скрыт</span>'; 
+                                ?>
+                            </td>
+                            <td class="text-end pe-3 text-nowrap">
+                                <a href="installer_edit.php?id=<?= $inst['id']; ?>" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1" title="Редактировать">
+                                    <i class="bi bi-pencil me-1"></i> Изменить
+                                </a>
+                                <?php if ($inst['is_active']): ?>
+                                    <a href="installers.php?delete=<?= $inst['id']; ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Скрыть мастера?');" title="Скрыть">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <a href="installers.php?restore=<?= $inst['id']; ?>" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Активировать">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-people display-4 opacity-50 d-block mb-2"></i>
+                                Мастера пока не добавлены
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
