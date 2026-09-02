@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Пароль должен содержать минимум 6 символов.';
     } else {
         // Регистрация (всегда как customer)
-        $result = registerUser($username, $email, $password, $first_name, $last_name, $phone, 'customer');
+        $result = registerUser($username, $email, $password, $first_name, $last_name, $phone, 'customer', $agree_personal_data);
         
         if ($result['success']) {
             // Автоматический вход после регистрации

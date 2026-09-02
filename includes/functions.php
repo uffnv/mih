@@ -165,7 +165,7 @@ function clearCart($user_id) {
 /**
  * РЕГИСТРАЦИЯ (С учетом полей first_name и last_name)
  */
-function registerUser($username, $email, $password, $first_name, $last_name, $phone, $role = 'customer') {
+function registerUser($username, $email, $password, $first_name, $last_name, $phone, $role = 'customer', $personal_data_agreed = false) {
     global $pdo;
 
     try {
@@ -186,22 +186,25 @@ function registerUser($username, $email, $password, $first_name, $last_name, $ph
         // 3. Хеш пароля
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // 4. Вставка (ИСПОЛЬЗУЕМ first_name и last_name)
-        // Если поле в базе называется иначе (например isactive без подчеркивания), поправьте здесь
-        // Предполагаю стандартный snake_case для всех полей, если вы уточнили про first_name
-        $sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, role) 
-                VALUES (:username, :email, :password, :fname, :lname, :phone, :role)";
-        
+        // 4. Вставка с фиксацией согласия на обработку персональных данных (152-ФЗ)
+        $agreed_flag = $personal_data_agreed ? 1 : 0;
+        $agreed_at   = $personal_data_agreed ? date('Y-m-d H:i:s') : null;
+
+        $sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, role, personal_data_agreed, personal_data_agreed_at)
+                VALUES (:username, :email, :password, :fname, :lname, :phone, :role, :agreed, :agreed_at)";
+
         $stmt = $pdo->prepare($sql);
-        
+
         $params = [
-            ':username' => $username,
-            ':email'    => $email,
-            ':password' => $hashed_password,
-            ':fname'    => $first_name,
-            ':lname'    => $last_name,
-            ':phone'    => $phone,
-            ':role'     => $role
+            ':username'   => $username,
+            ':email'      => $email,
+            ':password'   => $hashed_password,
+            ':fname'      => $first_name,
+            ':lname'      => $last_name,
+            ':phone'      => $phone,
+            ':role'       => $role,
+            ':agreed'     => $agreed_flag,
+            ':agreed_at'  => $agreed_at,
         ];
 
         if ($stmt->execute($params)) {
