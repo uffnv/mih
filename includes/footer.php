@@ -22,16 +22,13 @@
                     <div><strong>Ген. директор:</strong> Папин М. Н.</div>
                 </div>
                 <!-- Связь и мессенджер MAX -->
-                <div class="d-flex align-items-center gap-3 mt-3">
-                    <a href="https://t.me" target="_blank" class="text-white-50 fs-5 hover-warning text-decoration-none" title="Telegram">
-                        <i class="bi bi-telegram"></i>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                    <a href="https://t.me" target="_blank" class="messenger-btn bg-secondary bg-opacity-25 text-white hover-warning" title="Telegram">
+                        <i class="bi bi-telegram fs-5"></i>
                     </a>
                     <!-- Иконка MAX -->
-                    <a href="#" class="hover-scale text-decoration-none" title="Мессенджер MAX">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32" fill="none" class="shadow-sm rounded-3">
-                            <rect width="32" height="32" rx="8" fill="#ffc107"/>
-                            <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#111827" letter-spacing="0.5">MAX</text>
-                        </svg>
+                    <a href="#" class="messenger-btn bg-warning text-dark fw-bold" title="Мессенджер MAX">
+                        <span style="font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px;">MAX</span>
                     </a>
                 </div>
             </div>

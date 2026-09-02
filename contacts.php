@@ -49,7 +49,7 @@ include __DIR__ . '/includes/header.php';
                     </h4>
                     
                     <!-- Адреса магазинов -->
-                    <div class="d-flex align-items-start mb-4">
+                    <div class="contact-item d-flex align-items-start mb-3">
                         <div class="feature-icon-box flex-shrink-0 me-3">
                             <i class="bi bi-shop"></i>
                         </div>
@@ -67,7 +67,7 @@ include __DIR__ . '/includes/header.php';
                     </div>
 
                     <!-- Телефоны -->
-                    <div class="d-flex align-items-start mb-4">
+                    <div class="contact-item d-flex align-items-start mb-3">
                         <div class="feature-icon-box flex-shrink-0 me-3">
                             <i class="bi bi-telephone-fill"></i>
                         </div>
@@ -82,7 +82,7 @@ include __DIR__ . '/includes/header.php';
                     </div>
 
                     <!-- Email -->
-                    <div class="d-flex align-items-start mb-4">
+                    <div class="contact-item d-flex align-items-start mb-3">
                         <div class="feature-icon-box flex-shrink-0 me-3">
                             <i class="bi bi-envelope-fill"></i>
                         </div>
@@ -100,15 +100,12 @@ include __DIR__ . '/includes/header.php';
 
                     <h6 class="fw-bold mb-3 text-dark">Связь через мессенджеры</h6>
                     <div class="d-flex align-items-center gap-2">
-                        <a href="https://t.me" target="_blank" class="btn btn-dark rounded-circle shadow-sm" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;" title="Telegram">
+                        <a href="https://t.me" target="_blank" class="messenger-btn bg-dark text-white" title="Telegram">
                             <i class="bi bi-telegram fs-5"></i>
                         </a>
                         <!-- Иконка MAX -->
-                        <a href="#" class="shadow-sm rounded-3 d-inline-flex align-items-center justify-content-center text-decoration-none" style="width: 44px; height: 44px; background: #ffc107;" title="Мессенджер MAX">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                <rect width="32" height="32" rx="8" fill="#ffc107"/>
-                                <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#111827" letter-spacing="0.5">MAX</text>
-                            </svg>
+                        <a href="#" class="messenger-btn bg-warning text-dark fw-bold" title="Мессенджер MAX">
+                            <span style="font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px;">MAX</span>
                         </a>
                     </div>
                 </div>

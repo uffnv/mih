@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --bs-warning: #ffc107;
     --bs-warning-rgb: 255, 193, 7;
     --accent-orange: #ff9800;
@@ -155,24 +155,49 @@ a {
     transform: scale(1.06);
 }
 
-/* Feature Badge */
+/* Feature Badge & Contact Icons */
 .feature-icon-box {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
+    font-size: 1.4rem;
     background: rgba(255, 193, 7, 0.15);
-    color: #d39e00;
-    margin-bottom: 1rem;
+    color: #b38600;
     transition: var(--transition-fast);
 }
-.card:hover .feature-icon-box {
+.contact-item {
+    transition: var(--transition-fast);
+    padding: 6px 8px;
+    border-radius: 12px;
+}
+.contact-item:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+.contact-item:hover .feature-icon-box {
     background: var(--bs-warning);
-    color: #000;
-    transform: rotate(6deg) scale(1.05);
+    color: #111827;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.35);
+}
+
+/* Messenger Buttons */
+.messenger-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.messenger-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* Breadcrumbs */
