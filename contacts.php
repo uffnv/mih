@@ -100,9 +100,6 @@ include __DIR__ . '/includes/header.php';
 
                     <h6 class="fw-bold mb-3 text-dark">Связь через мессенджеры</h6>
                     <div class="d-flex align-items-center gap-2">
-                        <a href="https://t.me" target="_blank" class="messenger-btn bg-dark text-white" title="Telegram">
-                            <i class="bi bi-telegram fs-5"></i>
-                        </a>
                         <!-- Иконка MAX -->
                         <a href="#" class="messenger-btn bg-warning text-dark fw-bold" title="Мессенджер MAX">
                             <span style="font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px;">MAX</span>

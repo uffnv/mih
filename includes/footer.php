@@ -23,10 +23,6 @@
                 </div>
                 <!-- Связь и мессенджер MAX -->
                 <div class="d-flex align-items-center gap-2 mt-3">
-                    <a href="https://t.me" target="_blank" class="messenger-btn bg-secondary bg-opacity-25 text-white hover-warning" title="Telegram">
-                        <i class="bi bi-telegram fs-5"></i>
-                    </a>
-                    <!-- Иконка MAX -->
                     <a href="#" class="messenger-btn bg-warning text-dark fw-bold" title="Мессенджер MAX">
                         <span style="font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px;">MAX</span>
                     </a>
