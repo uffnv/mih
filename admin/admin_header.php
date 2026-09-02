@@ -81,6 +81,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <i class="bi bi-megaphone"></i> Акции
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $current_page == 'users.php' ? 'active' : '' ?>" href="users.php">
+                            <i class="bi bi-people-fill"></i> Пользователи
+                        </a>
+                    </li>
                     
                     <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
                         <span>Отзывы</span>
