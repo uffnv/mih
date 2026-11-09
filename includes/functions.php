@@ -1448,7 +1448,6 @@ function createInstallationRequest($data) {
         return false;
     }
 }
-}
 
 /**
  * Поиск товаров
@@ -2149,7 +2148,6 @@ function getLatestReviews($limit = 3) {
         return [];
     }
 }
-}
 // === ЭТОТ КОД ДОБАВИТЬ В КОНЕЦ functions.php ===
 
 // Функция получения главной картинки товара (для index.php)
@@ -2198,29 +2196,6 @@ if (!function_exists('getVideos')) {
     }
 }
 
-// Функция получения последних отзывов
-if (!function_exists('getLatestReviews')) {
-    function getLatestReviews($limit = 3) {
-    global $pdo;
-    try {
-        $stmt = $pdo->prepare("
-            SELECT r.id, r.user_id, r.rating, r.comment, r.created_at, 
-                   u.username, u.first_name, u.last_name 
-            FROM site_reviews r 
-            LEFT JOIN users u ON r.user_id = u.id 
-            WHERE r.is_approved = 1 
-            ORDER BY r.created_at DESC 
-            LIMIT ?
-        ");
-        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        return [];
-    }
-}
-    }
-}
 
 // Функция получения списка монтажников (с лимитом)
 if (!function_exists('getInstallersList')) {
