@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 350" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181c20"/>
+      <stop offset="100%" stop-color="#242c35"/>
+    </linearGradient>
+  </defs>
+  <rect width="500" height="350" rx="16" fill="url(#bgGrad)"/>
+  <circle cx="250" cy="150" r="80" fill="rgba(245, 158, 11, 0.08)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,4"/>
+  <g transform="translate(210, 110) scale(1.6)" fill="#f59e0b">
+    <path d="M10 22 Q25 12 40 22 L40 26 L10 26 Z M14 26 L8 44 M36 26 L42 44 M15 16 L35 16"/>
+  </g>
+  <text x="250" y="275" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ffffff" letter-spacing="-0.02em">Мангалы и барбекю</text>
+  <text x="250" y="302" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="12" font-weight="500" fill="#94a3b8">ТЕРРИТОРИЯ ТЕПЛА &bull; МАЙМА</text>
+</svg>

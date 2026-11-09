@@ -11,13 +11,13 @@ $in_stock_only = isset($_GET['in_stock']) ? (int)$_GET['in_stock'] : 0;
 
 // SQL с JOIN фото
 $sql = "SELECT p.*, pi.image_path as main_image 
-        FROM products p 
+        FROM products p
         LEFT JOIN (
             SELECT product_id, MIN(image_path) as image_path 
             FROM product_images 
-            WHERE is_main = 1 OR is_main IS NULL 
+            WHERE is_main = 1 OR is_main IS NULL
             GROUP BY product_id
-        ) pi ON pi.product_id = p.id 
+        ) pi ON pi.product_id = p.id
         WHERE p.is_active = 1";
 $params = [];
 
@@ -39,19 +39,33 @@ if ($in_stock_only) {
 switch ($sort) {
     case 'price_asc': $sql .= " ORDER BY p.price ASC"; break;
     case 'price_desc': $sql .= " ORDER BY p.price DESC"; break;
-    default: $sql .= " ORDER BY p.id DESC"; break; 
+    default: $sql .= " ORDER BY p.id DESC"; break;
 }
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Автоматическое наполнение базы, если товаров в каталоге нет
+if (empty($products) && empty($search) && empty($category_id)) {
+    try {
+        $seed_file = __DIR__ . '/database_seed.sql';
+        if (file_exists($seed_file)) {
+            $seed_sql = file_get_contents($seed_file);
+            $pdo->exec($seed_sql);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (Exception $e) {}
+}
+
 // Категории для сайдбара
-$cats_stmt = $pdo->query("SELECT c.*, COUNT(p.id) as product_count 
-                         FROM categories c 
-                         LEFT JOIN products p ON p.category_id = c.id AND p.is_active = 1 
-                         WHERE c.is_active = 1 
-                         GROUP BY c.id 
+$cats_stmt = $pdo->query("SELECT c.*, COUNT(p.id) as product_count
+                         FROM categories c
+                         LEFT JOIN products p ON p.category_id = c.id AND p.is_active = 1
+                         WHERE c.is_active = 1
+                         GROUP BY c.id
                          ORDER BY c.sort_order ASC");
 $categories = $cats_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -72,7 +86,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <main class="py-4 py-lg-5" style="background-color: var(--bg-page, #f8fafc);">
     <div class="container">
-        
+
         <!-- Хлебные крошки -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb small">
@@ -92,7 +106,7 @@ require_once __DIR__ . '/includes/header.php';
                         <span class="fw-bold"><i class="bi bi-grid-fill text-warning me-2"></i> Категории</span>
                         <span class="badge bg-warning text-dark"><?= count($products); ?> тов.</span>
                     </div>
-                    
+
                     <!-- Поиск -->
                     <div class="p-3 border-bottom bg-white">
                         <form method="GET" action="catalog.php" class="input-group input-group-sm">
@@ -108,12 +122,12 @@ require_once __DIR__ . '/includes/header.php';
 
                     <!-- Список категорий -->
                     <div class="list-group list-group-flush small">
-                        <a href="catalog.php<?= $search ? '?search=' . urlencode($search) : '' ?>" 
+                        <a href="catalog.php<?= $search ? '?search=' . urlencode($search) : '' ?>"
                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 fw-semibold <?= !$category_id ? 'bg-light text-warning fw-bold' : 'text-dark' ?>">
                             <span>Все категории</span>
                         </a>
                         <?php foreach ($categories as $cat): ?>
-                            <a href="catalog.php?category=<?= $cat['id']; ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
+                            <a href="catalog.php?category=<?= $cat['id']; ?><?= $search ? '&search=' . urlencode($search) : '' ?>"
                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 <?= $category_id == $cat['id'] ? 'bg-light text-warning fw-bold' : 'text-dark' ?>">
                                 <span><?= htmlspecialchars($cat['name']); ?></span>
                                 <span class="badge rounded-pill <?= $category_id == $cat['id'] ? 'bg-warning text-dark' : 'bg-light text-muted border' ?>">
@@ -189,8 +203,8 @@ require_once __DIR__ . '/includes/header.php';
                             $has_discount = !empty($prod['old_price']) && $prod['old_price'] > $prod['price'];
                         ?>
                             <div class="col">
-                                <div class="product-card">
-                                    <div class="product-img-box">
+                                <div class="product-card h-100 d-flex flex-column bg-white rounded-4 shadow-sm border-0 overflow-hidden" style="transition: transform 0.25s ease, box-shadow 0.25s ease;">
+                                    <div class="product-img-box position-relative" style="height: 200px; background: #fff; padding: 1rem; border-bottom: 1px solid #f1f5f9;">
                                         <?php if ($has_discount): 
                                             $pct = round((($prod['old_price'] - $prod['price']) / $prod['old_price']) * 100);
                                         ?>
@@ -200,7 +214,7 @@ require_once __DIR__ . '/includes/header.php';
                                         <?php endif; ?>
 
                                         <a href="product.php?id=<?= $prod['id']; ?>" class="w-100 h-100 d-flex align-items-center justify-content-center">
-                                            <img src="<?= htmlspecialchars($img_src); ?>" alt="<?= htmlspecialchars($prod['name']); ?>" loading="lazy">
+                                            <img src="<?= htmlspecialchars($img_src); ?>" alt="<?= htmlspecialchars($prod['name']); ?>" style="max-height: 100%; max-width: 100%; object-fit: contain;" loading="lazy">
                                         </a>
                                     </div>
 
@@ -221,7 +235,7 @@ require_once __DIR__ . '/includes/header.php';
                                             <?php endif; ?>
                                         </div>
 
-                                        <h6 class="fw-bold text-dark mb-2 line-clamp-2" style="min-height: 2.6rem;">
+                                        <h6 class="fw-bold text-dark mb-2" style="min-height: 2.6rem; line-height: 1.35;">
                                             <a href="product.php?id=<?= $prod['id']; ?>" class="text-dark text-decoration-none">
                                                 <?= htmlspecialchars($prod['name']); ?>
                                             </a>
@@ -274,36 +288,39 @@ require_once __DIR__ . '/includes/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.add-to-cart-btn').forEach(function(btn) {
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            const pid = this.dataset.productId;
-            const fd = new FormData();
-            fd.append('product_id', pid);
-            fd.append('quantity', 1);
+            const prodId = this.dataset.productId;
+            const originalHtml = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
 
-            fetch('ajax/add_to_cart.php', { method: 'POST', body: fd })
-            .then(r => r.json())
-            .then(res => {
-                if (res.success) {
+            fetch('ajax/cart_add.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'product_id=' + prodId + '&quantity=1'
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.disabled = false;
+                this.innerHTML = originalHtml;
+                if (data.status === 'success') {
                     const badge = document.getElementById('cart-count-badge');
                     if (badge) {
-                        badge.innerText = res.cart_count;
+                        badge.innerText = data.cart_count;
                         badge.style.display = 'inline-block';
                     }
-                    btn.classList.remove('btn-warning');
-                    btn.classList.add('btn-success');
-                    btn.innerHTML = '<i class="bi bi-check-lg"></i>';
-                    setTimeout(() => {
-                        btn.classList.remove('btn-success');
-                        btn.classList.add('btn-warning');
-                        btn.innerHTML = '<i class="bi bi-cart-plus-fill"></i>';
-                    }, 1500);
+                    showToast('Товар успешно добавлен в корзину!', 'success');
                 } else {
-                    alert(res.message || 'Ошибка добавления');
+                    showToast(data.message || 'Ошибка добавления', 'danger');
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                this.disabled = false;
+                this.innerHTML = originalHtml;
+                showToast('Ошибка связи с сервером', 'danger');
+            });
         });
     });
 });

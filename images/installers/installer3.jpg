@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <circle cx="100" cy="100" r="96" fill="#181c20" stroke="#f59e0b" stroke-width="6"/>
+  <text x="100" y="118" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="52" font-weight="800" fill="#f59e0b">СВ</text>
+  <circle cx="160" cy="160" r="22" fill="#f59e0b"/>
+  <path d="M152 160 L158 166 L170 153" fill="none" stroke="#181c20" stroke-width="3" stroke-linecap="round"/>
+</svg>

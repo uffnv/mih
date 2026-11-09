@@ -10,6 +10,7 @@ includes/config.local.php
 *.dump
 !schema.sql
 !database_cleanup.sql
+!database_seed.sql
 
 # Logs and cache
 *.log
