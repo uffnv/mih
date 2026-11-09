@@ -19,14 +19,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
 // Получаем счетчики для бейджей
 $pending_orders_count = 0;
 $pending_reviews_count = 0;
+$pending_apps_count = 0;
 $new_requests_count = 0;
 
 try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'");
     $pending_orders_count = (int)$stmt->fetchColumn();
 
-    $stmt = $pdo->query("SELECT COUNT(*) FROM reviews WHERE is_approved = 0");
+    $stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews WHERE is_approved = 0");
     $pending_reviews_count = (int)$stmt->fetchColumn();
+
+    $stmt = $pdo->query("SELECT COUNT(*) FROM installer_applications WHERE status = 'new'");
+    $pending_apps_count = (int)$stmt->fetchColumn();
 
     $stmt = $pdo->query("SELECT COUNT(*) FROM contact_requests WHERE status != 'processed'");
     $new_requests_count = (int)$stmt->fetchColumn();
@@ -37,7 +41,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($page_title ?? 'Панель управления'); ?> — Михаил Потапыч</title>
+    <title><?= htmlspecialchars($page_title ?? 'Панель управления'); ?> — Территория Тепла</title>
     
     <!-- Favicon -->
     <link rel="icon" href="../images/documents/logo.jpg">
@@ -142,7 +146,7 @@ try {
                         <i class="bi bi-person-fill-gear fs-5"></i>
                     </div>
                     <div>
-                        <div class="fw-bold text-white small">Михаил Потапыч</div>
+                        <div class="fw-bold text-white small">Территория Тепла</div>
                         <div class="text-warning small" style="font-size: 0.75rem;">
                             <?= htmlspecialchars($_SESSION['username'] ?? 'Администратор') ?>
                         </div>
@@ -222,6 +226,17 @@ try {
                     <li class="nav-item">
                         <a class="nav-link <?= in_array($current_page, ['installers.php', 'installer_edit.php']) ? 'active' : '' ?>" href="installers.php">
                             <i class="bi bi-person-badge"></i> <span>Монтажники</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $current_page == 'installer_applications.php' ? 'active' : '' ?>" href="installer_applications.php">
+                            <i class="bi bi-file-earmark-person"></i>
+                            <span class="d-flex justify-content-between align-items-center w-100">
+                                <span>Заявки мастеров</span>
+                                <?php if ($pending_apps_count > 0): ?>
+                                    <span class="badge bg-warning text-dark rounded-pill"><?= $pending_apps_count ?></span>
+                                <?php endif; ?>
+                            </span>
                         </a>
                     </li>
                     <li class="nav-item">

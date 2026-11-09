@@ -1426,28 +1426,28 @@ function getCartCount($user_id = null) {
 function createInstallationRequest($data) {
     global $pdo;
     try {
-        $sql = "INSERT INTO installation_requests 
-                (user_id, installer_id, product_id, request_type, description, preferred_date, preferred_time, address, client_name, client_phone, client_email, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
+        $sql = "INSERT INTO installer_requests 
+                (user_id, installer_id, request_type, description, preferred_date, preferred_time, address, client_name, client_phone, client_email, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([
-            $data['user_id'] ?? 1,
+            $data['user_id'] ?? null,
             $data['installer_id'] ?? null,
-            $data['product_id'] ?? null,
-            $data['request_type'],
+            $data['request_type'] ?? 'installation',
             $data['description'] ?? '',
             $data['preferred_date'] ?? null,
             $data['preferred_time'] ?? null,
-            $data['address'],
-            $data['client_name'],
-            $data['client_phone'],
-            $data['client_email'] ?? ''
+            $data['address'] ?? '',
+            $data['client_name'] ?? 'Клиент',
+            $data['client_phone'] ?? '',
+            $data['client_email'] ?? null
         ]);
         return $result ? $pdo->lastInsertId() : false;
     } catch (PDOException $e) {
-        error_log("Ошибка создания заявки: " . $e->getMessage());
+        error_log("Ошибка создания заявки монтажнику: " . $e->getMessage());
         return false;
     }
+}
 }
 
 /**
@@ -2133,22 +2133,22 @@ function getFeaturedProducts($limit = 4) {
 function getLatestReviews($limit = 3) {
     global $pdo;
     try {
-        // Предполагается таблица reviews или installer_reviews. 
-        // В index.php логика была под отзывы о ТОВАРАХ (reviews).
-        // Если таблицы reviews нет, вернет пустой массив.
         $stmt = $pdo->prepare("
-            SELECT r.*, u.username 
-            FROM reviews r 
+            SELECT r.id, r.user_id, r.rating, r.comment, r.created_at, 
+                   u.username, u.first_name, u.last_name 
+            FROM site_reviews r 
             LEFT JOIN users u ON r.user_id = u.id 
             WHERE r.is_approved = 1 
             ORDER BY r.created_at DESC 
             LIMIT ?
         ");
-        $stmt->execute([(int)$limit]);
+        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return [];
     }
+}
 }
 // === ЭТОТ КОД ДОБАВИТЬ В КОНЕЦ functions.php ===
 
@@ -2201,22 +2201,24 @@ if (!function_exists('getVideos')) {
 // Функция получения последних отзывов
 if (!function_exists('getLatestReviews')) {
     function getLatestReviews($limit = 3) {
-        global $pdo;
-        try {
-            $stmt = $pdo->prepare("
-                SELECT r.*, u.username 
-                FROM reviews r 
-                LEFT JOIN users u ON r.user_id = u.id 
-                WHERE r.is_approved = 1 
-                ORDER BY r.created_at DESC 
-                LIMIT ?
-            ");
-            $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            return [];
-        }
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("
+            SELECT r.id, r.user_id, r.rating, r.comment, r.created_at, 
+                   u.username, u.first_name, u.last_name 
+            FROM site_reviews r 
+            LEFT JOIN users u ON r.user_id = u.id 
+            WHERE r.is_approved = 1 
+            ORDER BY r.created_at DESC 
+            LIMIT ?
+        ");
+        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
     }
 }
 

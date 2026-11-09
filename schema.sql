@@ -69,35 +69,14 @@ LOCK TABLES `categories` WRITE;
 /*!40000 ALTER TABLE `categories` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `categories_new`
---
 
-DROP TABLE IF EXISTS `categories_new`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `categories_new` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `parent_id` int(11) DEFAULT NULL,
-  `image_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `is_active` tinyint(1) DEFAULT 1,
-  `sort_order` int(11) DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `parent_id` (`parent_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `categories_new`
---
 
-LOCK TABLES `categories_new` WRITE;
-/*!40000 ALTER TABLE `categories_new` DISABLE KEYS */;
-/*!40000 ALTER TABLE `categories_new` ENABLE KEYS */;
-UNLOCK TABLES;
+
+
 
 --
 -- Table structure for table `company_documents`
@@ -151,62 +130,23 @@ CREATE TABLE `contact_requests` (
 LOCK TABLES `contact_requests` WRITE;
 UNLOCK TABLES;
 
---
--- Table structure for table `documents`
---
 
-DROP TABLE IF EXISTS `documents`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `documents` (
-  `id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `file_path` varchar(255) NOT NULL,
-  `file_size` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `documents`
---
 
-LOCK TABLES `documents` WRITE;
-/*!40000 ALTER TABLE `documents` DISABLE KEYS */;
-/*!40000 ALTER TABLE `documents` ENABLE KEYS */;
-UNLOCK TABLES;
 
---
--- Table structure for table `installation_requests`
---
 
-DROP TABLE IF EXISTS `installation_requests`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `installation_requests` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `installer_id` int(11) NOT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `request_type` enum('consultation','installation','repair','maintenance') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `preferred_date` date DEFAULT NULL,
-  `preferred_time` time DEFAULT NULL,
-  `address` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` enum('pending','confirmed','in_progress','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
-  `total_cost` decimal(10,2) DEFAULT NULL,
-  `admin_notes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `installation_requests`
---
 
-LOCK TABLES `installation_requests` WRITE;
-UNLOCK TABLES;
+
+
 
 --
 -- Table structure for table `installer_applications`
@@ -421,32 +361,14 @@ LOCK TABLES `installers` WRITE;
 /*!40000 ALTER TABLE `installers` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `loyalty_transactions`
---
 
-DROP TABLE IF EXISTS `loyalty_transactions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `loyalty_transactions` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `order_id` int(11) DEFAULT NULL,
-  `points_change` int(11) NOT NULL,
-  `transaction_type` enum('earn','spend','adjustment') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `loyalty_transactions`
---
 
-LOCK TABLES `loyalty_transactions` WRITE;
-/*!40000 ALTER TABLE `loyalty_transactions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `loyalty_transactions` ENABLE KEYS */;
-UNLOCK TABLES;
+
+
 
 --
 -- Table structure for table `order_items`
@@ -668,34 +590,14 @@ INSERT INTO `review_stats` VALUES
 /*!40000 ALTER TABLE `review_stats` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `reviews`
---
 
-DROP TABLE IF EXISTS `reviews`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `reviews` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `installer_id` int(11) DEFAULT NULL,
-  `rating` tinyint(4) NOT NULL,
-  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `is_approved` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `reviews`
---
 
-LOCK TABLES `reviews` WRITE;
-/*!40000 ALTER TABLE `reviews` DISABLE KEYS */;
-/*!40000 ALTER TABLE `reviews` ENABLE KEYS */;
-UNLOCK TABLES;
+
+
 
 --
 -- Table structure for table `site_reviews`

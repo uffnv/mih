@@ -17,7 +17,15 @@ if (isset($_GET['restore'])) {
     exit;
 }
 
-$stmt = $pdo->query("
+// Категории для фильтра
+$categories = $pdo->query("SELECT id, name FROM categories ORDER BY sort_order ASC, name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Фильтры
+$search = trim($_GET['search'] ?? '');
+$cat_id = (int)($_GET['category_id'] ?? 0);
+$stock_filter = $_GET['stock'] ?? 'all';
+
+$sql = "
     SELECT p.*, c.name as category_name,
            COALESCE(
                (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1),
@@ -26,15 +34,40 @@ $stmt = $pdo->query("
            ) as primary_image
     FROM products p 
     LEFT JOIN categories c ON p.category_id = c.id 
-    ORDER BY p.id DESC
-");
+    WHERE 1=1
+";
+$params = [];
+
+if (!empty($search)) {
+    $sql .= " AND (p.name LIKE ? OR p.sku LIKE ? OR p.description LIKE ?) ";
+    $sTerm = "%$search%";
+    $params[] = $sTerm;
+    $params[] = $sTerm;
+    $params[] = $sTerm;
+}
+
+if ($cat_id > 0) {
+    $sql .= " AND p.category_id = ? ";
+    $params[] = $cat_id;
+}
+
+if ($stock_filter === 'in_stock') {
+    $sql .= " AND p.stock_quantity > 0 ";
+} elseif ($stock_filter === 'out_of_stock') {
+    $sql .= " AND (p.stock_quantity = 0 OR p.stock_quantity IS NULL) ";
+}
+
+$sql .= " ORDER BY p.id DESC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">
     <div>
         <h1 class="h3 fw-bold text-dark mb-0">Товары (<?= count($products) ?>)</h1>
-        <small class="text-muted">Каталог товаров интернет-магазина</small>
+        <small class="text-muted">Каталог товаров интернет-магазина «Территория Тепла»</small>
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
         <a href="product_edit.php" class="btn btn-warning fw-bold rounded-pill shadow-sm px-3">
@@ -56,6 +89,41 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 <?php endif; ?>
+
+<!-- Панель поиска и фильтрации -->
+<div class="card border-0 shadow-sm rounded-4 bg-white p-3 mb-4">
+    <form method="GET" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control border-start-0" placeholder="Поиск по названию или артикулу..." value="<?= htmlspecialchars($search) ?>">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="category_id" class="form-select">
+                <option value="0">Все категории</option>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?= $cat['id'] ?>" <?= $cat_id == $cat['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cat['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="stock" class="form-select">
+                <option value="all" <?= $stock_filter === 'all' ? 'selected' : '' ?>>Любой остаток</option>
+                <option value="in_stock" <?= $stock_filter === 'in_stock' ? 'selected' : '' ?>>В наличии (>0)</option>
+                <option value="out_of_stock" <?= $stock_filter === 'out_of_stock' ? 'selected' : '' ?>>Нет на складе</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-dark fw-bold rounded-pill w-100">Найти</button>
+            <?php if (!empty($search) || $cat_id > 0 || $stock_filter !== 'all'): ?>
+                <a href="products.php" class="btn btn-outline-secondary rounded-pill px-3" title="Сбросить"><i class="bi bi-x-lg"></i></a>
+            <?php endif; ?>
+        </div>
+    </form>
+</div>
 
 <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
     <div class="card-body p-0">
@@ -87,7 +155,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </td>
                             <td>
                                 <div class="fw-bold text-dark"><?= htmlspecialchars($prod['name']); ?></div>
-                                <small class="text-muted">Арт: <?= htmlspecialchars($prod['sku'] ?? '—'); ?></small>
+                                <small class="text-muted">Арт: <strong><?= htmlspecialchars($prod['sku'] ?? '—'); ?></strong></small>
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border"><?= htmlspecialchars($prod['category_name'] ?? 'Без категории'); ?></span>
@@ -135,7 +203,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-box display-4 opacity-50 d-block mb-2"></i>
-                                В каталоге пока нет добавленных товаров
+                                Товары по заданным критериям не найдены
                             </td>
                         </tr>
                     <?php endif; ?>

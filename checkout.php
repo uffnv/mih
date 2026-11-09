@@ -4,70 +4,102 @@ session_start();
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: auth.php");
-    exit;
-}
+$user_id = $_SESSION['user_id'] ?? 0;
+$page_title = 'Оформление заказа — Территория Тепла';
 
-$user_id = $_SESSION['user_id'];
-$page_title = 'Оформление заказа';
-
-// 1. ИСПРАВЛЕННЫЙ ЗАПРОС (БЕЗ JOIN-ов КАРТИНОК - НЕТ УЧЕТВЕРЕНИЯ)
-$stmt = $pdo->prepare("
-    SELECT c.quantity, c.product_id, p.name, p.price
-    FROM cart c
-    JOIN products p ON c.product_id = p.id
-    WHERE c.user_id = ?
-");
-$stmt->execute([$user_id]);
-$cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Получаем корзину (поддержка авторизованного пользователя и гостя)
+$cart_items = getCart($user_id);
 
 if (empty($cart_items)) {
     header('Location: cart.php');
     exit;
 }
 
-// Получаем данные юзера
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->execute([$user_id]);
-$user_info = $stmt->fetch(PDO::FETCH_ASSOC);
-
-$full_name_value = trim(($user_info['first_name'] ?? '') . ' ' . ($user_info['last_name'] ?? ''));
-$phone_value = $user_info['phone'] ?? '';
-$email_value = $user_info['email'] ?? '';
-$address_value = $user_info['address_line1'] ?? '';
-
-$error_message = '';
-$success_message = '';
 $calculated_total = 0;
-
 foreach ($cart_items as $item) {
     $calculated_total += $item['price'] * $item['quantity'];
 }
 
-// ОБРАБОТКА ФОРМЫ
+// Данные пользователя при наличии
+$full_name_value = '';
+$phone_value = '';
+$email_value = '';
+$address_value = '';
+
+if ($user_id > 0) {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $user_info = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user_info) {
+        $full_name_value = trim(($user_info['first_name'] ?? '') . ' ' . ($user_info['last_name'] ?? ''));
+        $phone_value = $user_info['phone'] ?? '';
+        $email_value = $user_info['email'] ?? '';
+        $address_value = $user_info['address_line1'] ?? '';
+    }
+}
+
+$error_message = '';
+$success_message = '';
+
+// ОБРАБОТКА ОФОРМЛЕНИЯ
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name']);
-    $phone = trim($_POST['phone']);
-    $email = trim($_POST['email']);
-    $address = trim($_POST['address']);
-    $comment = trim($_POST['comment']);
+    $name = trim($_POST['name'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $comment = trim($_POST['comment'] ?? '');
     $delivery_method = $_POST['delivery_method'] ?? 'pickup';
     $payment_method = $_POST['payment_method'] ?? 'cash';
-    
+    $consent_pd = isset($_POST['consent_pd']);
+    $consent_offer = isset($_POST['consent_offer']);
+
     $errors = [];
-    if (empty($name)) $errors[] = 'Введите имя';
+    if (empty($name)) $errors[] = 'Укажите ваше имя.';
     
     $clean_phone = preg_replace('/[^0-9]/', '', $phone);
-    if (strlen($clean_phone) < 10) $errors[] = 'Введите корректный номер телефона.';
+    if (strlen($clean_phone) < 10) $errors[] = 'Введите корректный номер телефона (не менее 10 цифр).';
 
     if ($delivery_method === 'courier' && empty($address)) {
-        $errors[] = 'Введите адрес доставки для курьера';
+        $errors[] = 'Укажите адрес доставки для курьера.';
+    }
+
+    if (!$consent_pd) {
+        $errors[] = 'Необходимо согласие на обработку персональных данных (152-ФЗ).';
+    }
+    if (!$consent_offer) {
+        $errors[] = 'Необходимо согласие с условиями Публичной оферты.';
     }
 
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
+
+            // Если гость - привязываем к существующему пользователю или создаем клиента
+            $order_user_id = $user_id;
+            if ($order_user_id == 0) {
+                // Ищем по телефону или email
+                $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE phone = ? OR (email != '' AND email = ?) LIMIT 1");
+                $stmtCheck->execute([$phone, $email]);
+                $existing_user = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+                
+                if ($existing_user) {
+                    $order_user_id = (int)$existing_user['id'];
+                } else {
+                    // Создаем гостевую учетную запись
+                    $gen_username = 'client_' . substr($clean_phone, -6) . '_' . rand(100, 999);
+                    $dummy_pass = password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT);
+                    $insUser = $pdo->prepare("
+                        INSERT INTO users (username, password, first_name, phone, email, role, created_at)
+                        VALUES (?, ?, ?, ?, ?, 'customer', NOW())
+                    ");
+                    $insUser->execute([$gen_username, $dummy_pass, $name, $phone, $email]);
+                    $order_user_id = (int)$pdo->lastInsertId();
+                }
+            }
+
+            if ($delivery_method === 'pickup') {
+                $address = 'Самовывоз: с. Майма, ул. Энергетиков, д. 24';
+            }
 
             $stmt = $pdo->prepare("INSERT INTO orders (
                 user_id, total_price, status, created_at, delivery_method, payment_method, 
@@ -75,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ) VALUES (?, ?, 'pending', NOW(), ?, ?, ?, ?, ?, ?, ?)");
             
             $stmt->execute([
-                $user_id, $calculated_total, 
+                $order_user_id, $calculated_total, 
                 $delivery_method, $payment_method, $address, 
                 $name, $phone, $email, $comment
             ]);
@@ -87,14 +119,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($cart_items as $item) {
                 $stmtInsertItem->execute([
                     $order_id, 
-                    $item['product_id'], 
+                    $item['product_id'] ?? $item['id'], 
                     $item['quantity'], 
                     $item['price'], 
                     $item['name']
                 ]);
             }
 
-            $pdo->prepare("DELETE FROM cart WHERE user_id = ?")->execute([$user_id]);
+            // Очищаем корзину в БД и сессии
+            if ($user_id > 0) {
+                $pdo->prepare("DELETE FROM cart WHERE user_id = ?")->execute([$user_id]);
+            }
+            if (isset($_SESSION['guest_cart'])) {
+                unset($_SESSION['guest_cart']);
+            }
+
             $pdo->commit();
             
             $success_message = "Заказ #$order_id успешно оформлен!";
@@ -102,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         } catch (Exception $e) {
             $pdo->rollBack();
-            $error_message = "Ошибка: " . $e->getMessage();
+            $error_message = "Ошибка при сохранении заказа: " . $e->getMessage();
         }
     } else {
         $error_message = implode('<br>', $errors);
@@ -112,35 +151,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<main class="py-4 py-lg-5 bg-light">
+<main class="py-4 py-lg-5" style="background-color: var(--bg-page, #f8fafc);">
     <div class="container">
         <!-- Хлебные крошки -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb small">
-                <li class="breadcrumb-item"><a href="index.php">Главная</a></li>
-                <li class="breadcrumb-item"><a href="cart.php">Корзина</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Оформление заказа</li>
+                <li class="breadcrumb-item"><a href="index.php" class="text-decoration-none text-muted">Главная</a></li>
+                <li class="breadcrumb-item"><a href="cart.php" class="text-decoration-none text-muted">Корзина</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Оформление заказа</li>
             </ol>
         </nav>
 
-        <!-- Прогресс оформления -->
+        <!-- Шаги оформления -->
         <div class="row justify-content-center mb-4">
             <div class="col-lg-8">
                 <div class="d-flex justify-content-between position-relative">
                     <div class="text-center flex-fill">
-                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-1" style="width: 32px; height: 32px;">
+                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-1 shadow-sm" style="width: 34px; height: 34px;">
                             <i class="bi bi-check2"></i>
                         </div>
-                        <div class="small fw-bold text-muted">1. Корзина</div>
+                        <div class="small fw-semibold text-muted">1. Корзина</div>
                     </div>
                     <div class="text-center flex-fill">
-                        <div class="rounded-circle bg-warning text-dark fw-bold d-inline-flex align-items-center justify-content-center mb-1 shadow-sm" style="width: 32px; height: 32px;">
+                        <div class="rounded-circle bg-warning text-dark fw-bold d-inline-flex align-items-center justify-content-center mb-1 shadow-sm" style="width: 34px; height: 34px;">
                             2
                         </div>
                         <div class="small fw-bold text-dark">2. Данные и доставка</div>
                     </div>
                     <div class="text-center flex-fill">
-                        <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center mb-1" style="width: 32px; height: 32px;">
+                        <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center mb-1" style="width: 34px; height: 34px;">
                             3
                         </div>
                         <div class="small text-muted">3. Подтверждение</div>
@@ -151,22 +190,15 @@ require_once __DIR__ . '/includes/header.php';
 
         <?php if ($success_message): ?>
             <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
-                <i class="bi bi-check-circle-fill display-2 text-success mb-3"></i>
-                <h2 class="fw-bold text-dark"><?= htmlspecialchars($success_message) ?></h2>
-                <p class="text-muted lead fs-6 mb-4">Менеджер свяжется с вами в ближайшее время для уточнения деталей доставки.</p>
-                <div>
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill display-2 text-success"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-2"><?= htmlspecialchars($success_message) ?></h2>
+                <p class="text-muted lead fs-6 mb-4">Спасибо за заказ! Наш специалист свяжется с вами по указанному телефону для подтверждения наличия и деталей получения.</p>
+                <div class="d-flex justify-content-center gap-3">
                     <a href="catalog.php" class="btn btn-warning fw-bold px-4 py-2 rounded-pill shadow-sm">
                         <i class="bi bi-arrow-left me-1"></i> Вернуться в каталог
                     </a>
-                </div>
-            </div>
-        <?php elseif (empty($cart_items)): ?>
-            <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
-                <i class="bi bi-cart-x display-3 text-muted mb-3"></i>
-                <h4 class="fw-bold">Корзина пуста</h4>
-                <p class="text-muted mb-4">Для оформления заказа добавьте товары в корзину</p>
-                <div>
-                    <a href="catalog.php" class="btn btn-warning fw-bold rounded-pill px-4">В каталог</a>
                 </div>
             </div>
         <?php else: ?>
@@ -183,24 +215,24 @@ require_once __DIR__ . '/includes/header.php';
                     <form method="POST" id="checkout-form">
                         <!-- 1. Контакты -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
-                            <div class="card-header bg-dark text-white py-3">
+                            <div class="card-header py-3" style="background: var(--dark-main, #181c20); color: #fff;">
                                 <h5 class="mb-0 fw-bold fs-6">
-                                    <i class="bi bi-person-lines-fill text-warning me-2"></i>1. Контактные данные
+                                    <i class="bi bi-person-lines-fill text-warning me-2"></i> 1. Контактные данные получателя
                                 </h5>
                             </div>
                             <div class="card-body p-4">
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Имя получателя *</label>
-                                        <input type="text" name="name" class="form-control bg-light" value="<?= htmlspecialchars($full_name_value) ?>" placeholder="Иван Иванов" required>
+                                        <label class="form-label small fw-bold text-muted text-uppercase">ФИО получателя *</label>
+                                        <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($full_name_value) ?>" placeholder="Иван Иванов" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted text-uppercase">Телефон *</label>
-                                        <input type="tel" name="phone" id="phone" class="form-control bg-light" value="<?= htmlspecialchars($phone_value) ?>" placeholder="+7 (___) ___-__-__" required>
+                                        <input type="tel" name="phone" id="phone" class="form-control" value="<?= htmlspecialchars($phone_value) ?>" placeholder="+7 (___) ___-__-__" required>
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Email адрес</label>
-                                        <input type="email" name="email" class="form-control bg-light" value="<?= htmlspecialchars($email_value) ?>" placeholder="name@example.com">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Email адрес (для чека)</label>
+                                        <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($email_value) ?>" placeholder="name@example.com">
                                     </div>
                                 </div>
                             </div>
@@ -208,9 +240,9 @@ require_once __DIR__ . '/includes/header.php';
 
                         <!-- 2. Доставка -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
-                            <div class="card-header bg-dark text-white py-3">
+                            <div class="card-header py-3" style="background: var(--dark-main, #181c20); color: #fff;">
                                 <h5 class="mb-0 fw-bold fs-6">
-                                    <i class="bi bi-truck text-warning me-2"></i>2. Способ доставки
+                                    <i class="bi bi-truck text-warning me-2"></i> 2. Способ получения
                                 </h5>
                             </div>
                             <div class="card-body p-4">
@@ -221,7 +253,9 @@ require_once __DIR__ . '/includes/header.php';
                                                 <input class="form-check-input" type="radio" name="delivery_method" id="del1" value="pickup" checked onchange="toggleAddress(false)">
                                                 <label class="form-check-label fw-bold d-block" for="del1">
                                                     Самовывоз (Бесплатно)
-                                                    <span class="d-block small text-muted fw-normal">с. Майма (ул. Ленина, 1/1) или г. Горно-Алтайск (ТЦ «Кристалл»)</span>
+                                                    <span class="d-block small text-muted fw-normal mt-1">
+                                                        <i class="bi bi-geo-alt-fill text-warning me-1"></i> с. Майма, ул. Энергетиков, д. 24
+                                                    </span>
                                                 </label>
                                             </div>
                                         </div>
@@ -231,8 +265,10 @@ require_once __DIR__ . '/includes/header.php';
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="delivery_method" id="del2" value="courier" onchange="toggleAddress(true)">
                                                 <label class="form-check-label fw-bold d-block" for="del2">
-                                                    Курьерская доставка
-                                                    <span class="d-block small text-muted fw-normal">Доставим до двери в удобное время</span>
+                                                    Доставка курьером / ТК
+                                                    <span class="d-block small text-muted fw-normal mt-1">
+                                                        По Республике Алтай и Алтайскому краю
+                                                    </span>
                                                 </label>
                                             </div>
                                         </div>
@@ -241,16 +277,16 @@ require_once __DIR__ . '/includes/header.php';
 
                                 <div id="address-block" style="display:none;" class="mt-3">
                                     <label class="form-label small fw-bold text-muted text-uppercase">Адрес доставки *</label>
-                                    <input type="text" name="address" class="form-control bg-light" value="<?= htmlspecialchars($address_value) ?>" placeholder="Город, улица, дом, квартира">
+                                    <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($address_value) ?>" placeholder="Населенный пункт, улица, номер дома">
                                 </div>
                             </div>
                         </div>
 
                         <!-- 3. Оплата -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
-                            <div class="card-header bg-dark text-white py-3">
+                            <div class="card-header py-3" style="background: var(--dark-main, #181c20); color: #fff;">
                                 <h5 class="mb-0 fw-bold fs-6">
-                                    <i class="bi bi-credit-card text-warning me-2"></i>3. Способ оплаты
+                                    <i class="bi bi-credit-card text-warning me-2"></i> 3. Способ оплаты
                                 </h5>
                             </div>
                             <div class="card-body p-4">
@@ -259,8 +295,9 @@ require_once __DIR__ . '/includes/header.php';
                                         <div class="p-3 border rounded-3 bg-light h-100">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="payment_method" id="pay1" value="cash" checked>
-                                                <label class="form-check-label fw-bold" for="pay1">
-                                                    <i class="bi bi-cash me-1 text-success"></i> Наличными при получении
+                                                <label class="form-check-label fw-bold d-block" for="pay1">
+                                                    При получении
+                                                    <span class="d-block small text-muted fw-normal mt-1">Оплата наличными или картой в магазине/курьеру</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -269,58 +306,95 @@ require_once __DIR__ . '/includes/header.php';
                                         <div class="p-3 border rounded-3 bg-light h-100">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="payment_method" id="pay2" value="card">
-                                                <label class="form-check-label fw-bold" for="pay2">
-                                                    <i class="bi bi-credit-card-2-front me-1 text-primary"></i> Картой при получении
+                                                <label class="form-check-label fw-bold d-block" for="pay2">
+                                                    Безналичный расчет
+                                                    <span class="d-block small text-muted fw-normal mt-1">Выставление счета для физ. и юр. лиц</span>
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="mt-3">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Комментарий к заказу</label>
+                                    <textarea name="comment" class="form-control" rows="2" placeholder="Удобное время звонка, особенности подъезда..."></textarea>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Комментарий -->
+
+                        <!-- 4. Юридические согласия (152-ФЗ и Оферта) -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
-                            <label class="form-label small fw-bold text-muted text-uppercase">Комментарий к заказу</label>
-                            <textarea name="comment" class="form-control bg-light" rows="2" placeholder="Пожелания по времени доставки, этаж, домофон..."></textarea>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="consent_pd" id="consent_pd" required checked>
+                                <label class="form-check-label small text-muted" for="consent_pd">
+                                    Я согласен на <a href="terms.php#privacy" target="_blank" class="text-dark fw-semibold">обработку персональных данных</a> в соответствии с Федеральным законом № 152-ФЗ. *
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="consent_offer" id="consent_offer" required checked>
+                                <label class="form-check-label small text-muted" for="consent_offer">
+                                    Я ознакомлен и согласен с условиями <a href="terms.php" target="_blank" class="text-dark fw-semibold">Публичной оферты</a> и правилами возврата товара надлежащего качества в течение 7 дней (ст. 26.1 ЗОЗПП). *
+                                </label>
+                            </div>
                         </div>
 
-                        <div class="mb-3 px-2 text-center text-muted small">
-                            Нажимая «Подтвердить заказ», вы соглашаетесь на 
-                            <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-dark fw-bold text-decoration-underline">
-                                обработку персональных данных
-                            </a> в соответствии с 152-ФЗ
-                        </div>
-
-                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold py-3 rounded-pill shadow-sm fs-5">
-                            <i class="bi bi-check2-circle me-1"></i> Подтвердить заказ
+                        <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-sm fs-5">
+                            Подтвердить и оформить заказ <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </form>
                 </div>
 
-                <!-- Сводка заказа -->
+                <!-- Правая колонка: Сводка заказа -->
                 <div class="col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 bg-white sticky-top overflow-hidden" style="top: 85px; z-index: 10;">
-                        <div class="card-header bg-dark text-white py-3">
-                            <h5 class="mb-0 fw-bold fs-6">Ваш заказ</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                <?php foreach ($cart_items as $item): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 85px; z-index: 10;">
+                        <h5 class="fw-bold mb-3 text-dark pb-2 border-bottom">Состав заказа</h5>
+                        
+                        <div class="order-items-list mb-3" style="max-height: 280px; overflow-y: auto;">
+                            <?php foreach ($cart_items as $ci): 
+                                $ciTotal = $ci['price'] * $ci['quantity'];
+                            ?>
+                                <div class="d-flex justify-content-between align-items-center mb-2 small pb-2 border-bottom border-light">
                                     <div class="pe-2">
-                                        <div class="fw-bold text-dark small text-truncate" style="max-width: 180px;"><?= htmlspecialchars($item['name']) ?></div>
-                                        <div class="small text-muted"><?= $item['quantity'] ?> × <?= number_format($item['price'], 0, '.', ' ') ?> ₽</div>
+                                        <div class="fw-semibold text-dark text-truncate" style="max-width: 190px;">
+                                            <?= htmlspecialchars($ci['name']) ?>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                            <?= $ci['quantity'] ?> × <?= number_format($ci['price'], 0, '.', ' ') ?> ₽
+                                        </div>
                                     </div>
-                                    <span class="fw-bold text-dark text-nowrap"><?= number_format($item['price'] * $item['quantity'], 0, '.', ' ') ?> ₽</span>
-                                </li>
-                                <?php endforeach; ?>
-                            </ul>
-                            <div class="p-4 bg-light border-top">
-                                <div class="d-flex justify-content-between align-items-baseline fs-5 fw-bold text-dark">
-                                    <span>Итого:</span>
-                                    <span class="fs-4"><?= number_format($calculated_total, 0, '.', ' ') ?> ₽</span>
+                                    <div class="fw-bold text-nowrap text-dark">
+                                        <?= number_format($ciTotal, 0, '.', ' ') ?> ₽
+                                    </div>
                                 </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div class="d-flex justify-content-between text-muted mb-2 small">
+                            <span>Товаров:</span>
+                            <span class="fw-semibold text-dark"><?= count($cart_items) ?> поз.</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted mb-3 small">
+                            <span>Доставка:</span>
+                            <span class="text-success fw-medium" id="delivery-price-text">Бесплатно (самовывоз)</span>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="d-flex justify-content-between align-items-baseline mb-4">
+                            <span class="fs-5 fw-bold text-dark">Итого:</span>
+                            <span class="fs-3 fw-bold text-dark">
+                                <?= number_format($calculated_total, 0, '.', ' ') ?> ₽
+                            </span>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 small text-muted">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="bi bi-geo-alt-fill text-warning"></i>
+                                <span><strong>Самовывоз:</strong> с. Майма, ул. Энергетиков, 24</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-telephone-fill text-warning"></i>
+                                <span><strong>Справка:</strong> +7 (913) 691-44-43</span>
                             </div>
                         </div>
                     </div>
@@ -333,22 +407,16 @@ require_once __DIR__ . '/includes/header.php';
 <script>
 function toggleAddress(show) {
     const block = document.getElementById('address-block');
-    if (block) block.style.display = show ? 'block' : 'none';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-        phoneInput.addEventListener('input', function (e) {
-            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-            if (!x[2] && x[1] !== '') {
-                e.target.value = x[1] === '7' || x[1] === '8' ? '+7 ' : '+7 ' + x[1];
-            } else {
-                e.target.value = !x[2] ? x[1] : '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
-            }
-        });
+    const delText = document.getElementById('delivery-price-text');
+    if (block) {
+        block.style.display = show ? 'block' : 'none';
+        const input = block.querySelector('input');
+        if (input) input.required = show;
     }
-});
+    if (delText) {
+        delText.innerText = show ? 'По тарифам ТК' : 'Бесплатно (самовывоз)';
+    }
+}
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

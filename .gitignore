@@ -9,6 +9,7 @@ includes/config.local.php
 *.sql.gz
 *.dump
 !schema.sql
+!database_cleanup.sql
 
 # Logs and cache
 *.log
