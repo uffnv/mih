@@ -63,11 +63,19 @@
                     </li>
                 </ul>
 
-                <div class="p-2 bg-black bg-opacity-25 rounded-3 border border-secondary border-opacity-25 small">
-                    <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-decoration-none text-white-50 hover-warning d-inline-flex align-items-center gap-2">
-                        <i class="bi bi-shield-lock-fill text-warning fs-6"></i>
-                        <span>Политика конфиденциальности и 152-ФЗ</span>
-                    </a>
+                <div class="d-flex flex-column gap-2">
+                    <div class="p-2 bg-black bg-opacity-25 rounded-3 border border-secondary border-opacity-25 small">
+                        <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-decoration-none text-white-50 hover-warning d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-shield-lock-fill text-warning fs-6"></i>
+                            <span>Политика конфиденциальности и 152-ФЗ</span>
+                        </a>
+                    </div>
+                    <div class="p-2 bg-black bg-opacity-25 rounded-3 border border-secondary border-opacity-25 small">
+                        <a href="terms.php" class="text-decoration-none text-white-50 hover-warning d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-text-fill text-warning fs-6"></i>
+                            <span>Пользовательское соглашение и оферта (ЗоЗПП)</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,6 +91,20 @@
     </div>
 </footer>
 
+<!-- 152-ФЗ: Баннер согласия на использование Cookie -->
+<div id="cookieBanner" class="position-fixed bottom-0 start-0 end-0 bg-dark text-white p-3 shadow-lg border-top border-warning border-2" style="z-index: 9999; display: none;">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div class="small">
+            Мы используем файлы cookie для персонализации сервисов и анализа посещаемости в соответствии с 
+            <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-warning text-decoration-underline">Политикой обработки персональных данных</a> (152-ФЗ).
+            Продолжая использовать сайт, вы соглашаетесь с их использованием.
+        </div>
+        <button id="acceptCookieBtn" type="button" class="btn btn-warning btn-sm fw-bold px-4 text-nowrap rounded-3">
+            Принять
+        </button>
+    </div>
+</div>
+
 <!-- Скрипты -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -91,6 +113,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof GLightbox !== 'undefined') {
         GLightbox({ selector: '.glightbox' });
+    }
+    
+    // Проверка согласия Cookie
+    if (!localStorage.getItem('cookie_consent_accepted')) {
+        var banner = document.getElementById('cookieBanner');
+        if (banner) banner.style.display = 'block';
+    }
+    var btn = document.getElementById('acceptCookieBtn');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            localStorage.setItem('cookie_consent_accepted', 'true');
+            var banner = document.getElementById('cookieBanner');
+            if (banner) banner.style.display = 'none';
+        });
     }
 });
 </script>

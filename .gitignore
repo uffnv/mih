@@ -1,0 +1,22 @@
+# Local configuration (database passwords, tokens)
+includes/config.local.php
+.env
+.env.*
+.envrc
+
+# Database dumps (may contain personal data under 152-FZ)
+*.sql
+*.sql.gz
+*.dump
+!schema.sql
+
+# Logs and cache
+*.log
+/logs/
+/cache/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

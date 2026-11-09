@@ -1,0 +1,26 @@
+# 1. Защита от листинга директорий
+Options -Indexes
+
+# 2. Защита конфигов, секретов, логов и дампов БД
+<FilesMatch "(^#.*#|\.(bak|conf|dist|fla|in[ci]|log|psd|sh|sql|sw[op]|env|envrc|git.*)|~)$">
+    Require all denied
+</FilesMatch>
+
+<Files "config.local.php">
+    Require all denied
+</Files>
+
+# 3. HTTP Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# 4. Страницы ошибок
+ErrorDocument 401 /401.php
+ErrorDocument 403 /403.php
+ErrorDocument 404 /404.php
+ErrorDocument 405 /405.php
+ErrorDocument 500 /500.php
