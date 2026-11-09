@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -176,11 +176,16 @@ require_once __DIR__ . '/includes/header.php';
                             ?>
                             <div class="col">
                                 <div class="card h-100 border-0 shadow-sm product-card position-relative bg-white">
-                                    <?php if ($hasDiscount): ?>
-                                        <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm" style="z-index: 5;">
-                                            -<?= round(($prod['old_price'] - $prod['price']) / $prod['old_price'] * 100) ?>%
+                                    <div class="d-flex justify-content-between position-absolute top-0 start-0 end-0 p-2" style="z-index: 5;">
+                                        <span class="badge-stock">
+                                            <i class="bi bi-check2 me-1"></i>В наличии
                                         </span>
-                                    <?php endif; ?>
+                                        <?php if ($hasDiscount): ?>
+                                            <span class="badge-discount">
+                                                -<?= round(($prod['old_price'] - $prod['price']) / $prod['old_price'] * 100) ?>%
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                     
                                     <div class="product-img-wrapper">
                                         <img src="<?= htmlspecialchars($img); ?>" alt="<?= htmlspecialchars($prod['name']); ?>" loading="lazy">
@@ -188,24 +193,24 @@ require_once __DIR__ . '/includes/header.php';
                                     
                                     <div class="card-body d-flex flex-column pt-3">
                                         <?php if (!empty($prod['sku'])): ?>
-                                            <div class="small text-muted mb-1">Арт: <?= htmlspecialchars($prod['sku']); ?></div>
+                                            <div class="small text-muted mb-1 font-monospace" style="font-size: 0.8rem;">Арт. <?= htmlspecialchars($prod['sku']); ?></div>
                                         <?php endif; ?>
 
-                                        <h5 class="card-title fs-6 fw-bold mb-2">
+                                        <h5 class="card-title fs-6 fw-bold mb-2 lh-sm">
                                             <a href="product.php?id=<?= $prod['id']; ?>" class="text-decoration-none text-dark stretched-link">
                                                 <?= htmlspecialchars($prod['name']); ?>
                                             </a>
                                         </h5>
                                         
-                                        <div class="mt-auto pt-2">
-                                            <div class="mb-3 d-flex align-items-baseline gap-2">
+                                        <div class="mt-auto pt-3 border-top">
+                                            <div class="mb-2 d-flex align-items-baseline gap-2">
                                                 <span class="text-dark fw-bold fs-5"><?= number_format($prod['price'], 0, '.', ' '); ?> ₽</span>
                                                 <?php if ($hasDiscount): ?>
-                                                    <small class="text-muted text-decoration-line-through"><?= number_format($prod['old_price'], 0, '.', ' '); ?> ₽</small>
+                                                    <small class="text-muted text-decoration-line-through" style="font-size: 0.85rem;"><?= number_format($prod['old_price'], 0, '.', ' '); ?> ₽</small>
                                                 <?php endif; ?>
                                             </div>
 
-                                            <button class="btn btn-warning w-100 fw-bold rounded-pill shadow-sm btn-add-cart position-relative z-2" 
+                                            <button class="btn btn-warning w-100 fw-bold py-2 shadow-sm btn-add-cart position-relative z-2" 
                                                     data-product-id="<?= $prod['id']; ?>">
                                                 <i class="bi bi-cart-plus me-1"></i> В корзину
                                             </button>

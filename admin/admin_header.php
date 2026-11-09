@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // admin/admin_header.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -48,25 +48,27 @@ try {
 
     <style>
         :root {
-            --admin-sidebar-bg: #1e2227;
-            --admin-accent: #ffc107;
-            --admin-hover-bg: rgba(255, 193, 7, 0.1);
+            --admin-sidebar-bg: #14181c;
+            --admin-accent: #f59e0b;
+            --admin-accent-hover: #d97706;
+            --admin-hover-bg: rgba(245, 158, 11, 0.12);
         }
         body {
-            background-color: #f4f6f9;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background-color: #f1f5f9;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: #1e293b;
         }
         .sidebar {
             min-height: 100vh;
             background-color: var(--admin-sidebar-bg);
             color: #fff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+            transition: all 0.25s;
         }
         .sidebar .nav-link {
-            color: rgba(255,255,255,.75);
+            color: #94a3b8;
             padding: 9px 16px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             border-radius: 8px;
             margin: 2px 10px;
@@ -75,15 +77,15 @@ try {
             transition: all 0.2s ease-in-out;
         }
         .sidebar .nav-link:hover {
-            color: #fff;
-            background-color: rgba(255,255,255,.08);
+            color: #ffffff;
+            background-color: rgba(255,255,255,.06);
             transform: translateX(3px);
         }
         .sidebar .nav-link.active {
-            color: #212529 !important;
+            color: #181c20 !important;
             background-color: var(--admin-accent) !important;
             font-weight: 700;
-            box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
         }
         .sidebar .nav-link i {
             margin-right: 12px;
@@ -92,20 +94,29 @@ try {
             text-align: center;
         }
         .sidebar-heading {
-            font-size: 0.75rem;
-            letter-spacing: 1px;
+            font-size: 0.72rem;
+            letter-spacing: 0.8px;
             font-weight: 700;
-            color: rgba(255,255,255,0.4) !important;
+            color: #64748b !important;
         }
         .admin-card {
-            border: none;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.03);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .admin-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        .table thead th {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            font-weight: 700;
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
         }
     </style>
 </head>

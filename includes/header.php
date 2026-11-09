@@ -52,18 +52,36 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- GLightbox CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
 
-    <!-- Единые стили -->
+    <!-- Единые инженерные стили -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="d-flex flex-column min-vh-100" style="background-color: #f8f9fa;">
+<body class="d-flex flex-column min-vh-100">
 
-<!-- ШАПКА САЙТА -->
-<header class="sticky-top bg-dark shadow-sm">
+<!-- 1. ВЕРХНЯЯ ИНФОРМАЦИОННАЯ ПЛАШКА -->
+<div class="header-top-bar py-1">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <span><i class="bi bi-geo-alt-fill text-warning me-1"></i> с. Майма, ул. Ленина, 1/1</span>
+            <span class="d-none d-md-inline"><i class="bi bi-clock-fill text-warning me-1"></i> Пн–Сб: 09:00 – 18:00</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <a href="tel:+79136914443" class="text-white text-decoration-none fw-bold hover-warning">
+                <i class="bi bi-telephone-fill text-warning me-1"></i> +7 (913) 691-44-43
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 2. ОСНОВНАЯ ШАПКА САЙТА -->
+<header class="sticky-top main-header">
     <nav class="navbar navbar-expand-lg navbar-dark container py-2">
         <!-- Логотип -->
-        <a class="navbar-brand fw-bold text-uppercase d-flex align-items-center" href="index.php">
-            <img src="images/documents/logo.jpg" alt="Логотип" style="height: 40px; width: auto;" class="me-2 rounded shadow-sm" onerror="this.style.display='none'">
-            <span class="text-white">Михаил Потапыч</span>
+        <a class="navbar-brand text-uppercase d-flex align-items-center" href="index.php">
+            <img src="images/documents/logo.jpg" alt="Логотип" style="height: 42px; width: auto;" class="me-2 rounded shadow-sm" onerror="this.style.display='none'">
+            <div>
+                <span class="text-white fw-bold d-block lh-1">Михаил Потапыч</span>
+                <small class="text-white-50" style="font-size: 0.68rem; letter-spacing: 0.5px;">ОТОПИТЕЛЬНЫЕ СИСТЕМЫ</small>
+            </div>
         </a>
 
         <!-- Мобильное меню (бургер) -->
@@ -73,45 +91,48 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
         <!-- Основное меню -->
         <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium ps-lg-3">
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page === 'catalog.php' ? 'active-page text-warning' : 'text-light' ?>" href="catalog.php">Каталог</a>
+                    <a class="nav-link <?= $current_page === 'catalog.php' ? 'active-page' : 'text-light' ?>" href="catalog.php">Каталог</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page === 'promotions.php' ? 'active-page text-warning' : 'text-warning fw-bold' ?>" href="promotions.php">Акции %</a>
+                    <a class="nav-link <?= $current_page === 'promotions.php' ? 'active-page' : 'text-warning fw-bold' ?>" href="promotions.php">Акции %</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= ($current_page === 'installers.php' || $current_page === 'installer.php') ? 'active-page text-warning' : 'text-light' ?>" href="installers.php">Монтажники</a>
+                    <a class="nav-link <?= ($current_page === 'installers.php' || $current_page === 'installer.php') ? 'active-page' : 'text-light' ?>" href="installers.php">Монтажники</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page === 'reviews.php' ? 'active-page text-warning' : 'text-light' ?>" href="reviews.php">Отзывы</a>
+                    <a class="nav-link <?= $current_page === 'reviews.php' ? 'active-page' : 'text-light' ?>" href="reviews.php">Отзывы</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page === 'about.php' ? 'active-page text-warning' : 'text-light' ?>" href="about.php">О нас</a>
+                    <a class="nav-link <?= $current_page === 'about.php' ? 'active-page' : 'text-light' ?>" href="about.php">О нас</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page === 'contacts.php' ? 'active-page text-warning' : 'text-light' ?>" href="contacts.php">Контакты</a>
+                    <a class="nav-link <?= $current_page === 'contacts.php' ? 'active-page' : 'text-light' ?>" href="contacts.php">Контакты</a>
                 </li>
             </ul>
 
             <!-- Правая часть (Корзина, Профиль) -->
-            <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+            <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
                 <!-- Корзина -->
-                <a href="cart.php" class="position-relative text-light fs-5 text-decoration-none p-2 rounded hover-warning" title="Корзина">
-                    <i class="bi bi-cart3"></i>
-                    <span id="cart-count-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark" style="font-size: 0.65rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
+                <a href="cart.php" class="btn btn-outline-light position-relative btn-sm d-flex align-items-center gap-2 px-3 py-2" title="Корзина">
+                    <i class="bi bi-cart3 fs-6"></i>
+                    <span class="d-none d-sm-inline">Корзина</span>
+                    <span id="cart-count-badge" class="badge bg-warning text-dark rounded-pill fw-bold" style="<?= $cart_count > 0 ? '' : 'display:none;' ?>">
                         <?= $cart_count; ?>
                     </span>
                 </a>
 
                 <!-- Профиль / Вход -->
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="<?= $cabinet_link; ?>" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2" title="<?= $cabinet_title; ?>">
+                    <a href="<?= $cabinet_link; ?>" class="btn btn-outline-secondary text-white btn-sm d-flex align-items-center gap-2 px-3 py-2" title="<?= $cabinet_title; ?>">
                         <i class="bi bi-person-circle"></i>
                         <span><?= htmlspecialchars($_SESSION['username'] ?? 'Кабинет'); ?></span>
                     </a>
                 <?php else: ?>
-                    <a href="login.php" class="btn btn-sm btn-warning fw-bold text-dark px-3 shadow-sm">Войти</a>
+                    <a href="login.php" class="btn btn-sm btn-warning fw-bold text-dark px-3 py-2 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Войти
+                    </a>
                 <?php endif; ?>
             </div>
         </div>

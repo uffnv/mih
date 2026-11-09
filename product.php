@@ -6,8 +6,8 @@ require_once __DIR__ . '/includes/functions.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Получаем товар
-$stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
+// Получаем товар и категорию
+$stmt = $pdo->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
 $stmt->execute([$id]);
 $product = $stmt->fetch();
 
@@ -40,14 +40,17 @@ require_once __DIR__ . '/includes/header.php';
             <ol class="breadcrumb small">
                 <li class="breadcrumb-item"><a href="index.php">Главная</a></li>
                 <li class="breadcrumb-item"><a href="catalog.php">Каталог</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($product['name']); ?></li>
+                <?php if (!empty($product['category_name'])): ?>
+                    <li class="breadcrumb-item"><a href="catalog.php?category=<?= $product['category_id'] ?>"><?= htmlspecialchars($product['category_name']) ?></a></li>
+                <?php endif; ?>
+                <li class="breadcrumb-item active text-truncate" style="max-width: 320px;" aria-current="page"><?= htmlspecialchars($product['name']); ?></li>
             </ol>
         </nav>
 
         <div class="row g-4 g-lg-5">
             <!-- Галерея -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white p-3 p-md-4 mb-3">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white p-3 p-md-4 mb-3 border">
                     <a href="<?= htmlspecialchars($main_image); ?>" class="glightbox d-flex align-items-center justify-content-center" data-gallery="product-gallery" style="min-height: 320px; max-height: 460px;">
                         <img id="main-product-image" src="<?= htmlspecialchars($main_image); ?>" class="img-fluid rounded" style="max-height: 420px; object-fit: contain;" alt="<?= htmlspecialchars($product['name']); ?>">
                     </a>
@@ -71,17 +74,25 @@ require_once __DIR__ . '/includes/header.php';
 
             <!-- Инфо о товаре -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill">
-                            <i class="bi bi-check-circle-fill me-1"></i> В наличии
-                        </span>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 bg-white h-100 border">
+                    
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <?php if ((int)($product['stock_quantity'] ?? 0) > 0): ?>
+                            <span class="badge-stock">
+                                <i class="bi bi-check2-circle me-1"></i> В наличии на складе (<?= (int)$product['stock_quantity'] ?> шт.)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-1 fw-bold rounded-2" style="font-size: 0.75rem;">
+                                <i class="bi bi-clock me-1"></i> Под заказ (доставка 3-5 дней)
+                            </span>
+                        <?php endif; ?>
+
                         <?php if (!empty($product['sku'])): ?>
-                            <span class="text-muted small">Арт: <strong><?= htmlspecialchars($product['sku']); ?></strong></span>
+                            <span class="text-muted small font-monospace">Артикул: <strong><?= htmlspecialchars($product['sku']); ?></strong></span>
                         <?php endif; ?>
                     </div>
 
-                    <h1 class="h3 fw-bold mb-3 text-dark"><?= htmlspecialchars($product['name']); ?></h1>
+                    <h1 class="h3 fw-bold mb-3 text-dark lh-sm"><?= htmlspecialchars($product['name']); ?></h1>
 
                     <!-- Рейтинг -->
                     <div class="d-flex align-items-center gap-2 mb-3">
@@ -92,7 +103,7 @@ require_once __DIR__ . '/includes/header.php';
                             <i class="bi bi-star-fill"></i>
                             <i class="bi bi-star-fill"></i>
                         </div>
-                        <span class="small text-muted">(5.0)</span>
+                        <span class="small text-muted fw-bold">5.0 (проверено ОТК)</span>
                     </div>
 
                     <!-- Цена -->
@@ -105,21 +116,21 @@ require_once __DIR__ . '/includes/header.php';
                         <div class="d-flex align-items-baseline gap-3">
                             <span class="display-6 fw-bold text-dark"><?= number_format($product['price'], 0, '.', ' '); ?> ₽</span>
                             <?php if (!empty($product['old_price']) && $product['old_price'] > $product['price']): ?>
-                                <span class="badge bg-danger rounded-pill">
-                                    -<?= round(($product['old_price'] - $product['price']) / $product['old_price'] * 100) ?>%
+                                <span class="badge-discount">
+                                    Экономия <?= number_format($product['old_price'] - $product['price'], 0, '.', ' ') ?> ₽
                                 </span>
                             <?php endif; ?>
                         </div>
                     </div>
 
                     <?php if (!empty($product['short_description'])): ?>
-                        <p class="text-muted mb-4 small">
+                        <p class="text-muted mb-4 small lh-base">
                             <?= nl2br(htmlspecialchars($product['short_description'])); ?>
                         </p>
                     <?php endif; ?>
 
                     <!-- Блок покупки -->
-                    <div class="product-action-wrapper p-3 bg-light rounded-4 border mb-4">
+                    <div class="product-action-wrapper p-3 bg-light rounded-3 border mb-4">
                         <div class="row g-2 align-items-center">
                             <div class="col-sm-4">
                                 <div class="input-group">
@@ -129,22 +140,61 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                             </div>
                             <div class="col-sm-8">
-                                <button class="btn btn-warning w-100 fw-bold py-2 rounded-pill shadow-sm btn-add-cart" data-product-id="<?= $product['id']; ?>">
+                                <button class="btn btn-warning w-100 fw-bold py-2 shadow-sm btn-add-cart" data-product-id="<?= $product['id']; ?>">
                                     <i class="bi bi-cart-plus-fill me-1"></i> Добавить в корзину
                                 </button>
                             </div>
                         </div>
                     </div>
 
+                    <?php if (!empty($product['installation_required'])): ?>
+                        <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-50 small mb-4">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-tools text-warning fs-5 mt-1"></i>
+                                <div>
+                                    <strong class="text-dark d-block">Рекомендован сертифицированный монтаж</strong>
+                                    <span class="text-muted">Для сохранения заводской гарантии рекомендуем установку нашими аккредитованными мастерами.</span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Таблица характеристик -->
+                    <div class="border rounded-3 p-3 mb-4 bg-white">
+                        <h6 class="fw-bold text-dark mb-3 small text-uppercase">Основные параметры:</h6>
+                        <table class="table table-sm table-borderless small mb-0">
+                            <tbody>
+                                <?php if (!empty($product['category_name'])): ?>
+                                    <tr>
+                                        <td class="text-muted" style="width: 45%;">Категория:</td>
+                                        <td class="fw-bold"><?= htmlspecialchars($product['category_name']) ?></td>
+                                    </tr>
+                                <?php endif; ?>
+                                <tr>
+                                    <td class="text-muted">Гарантия:</td>
+                                    <td class="fw-bold"><?= (int)($product['warranty_months'] ?? 12) ?> месяцев</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Производитель:</td>
+                                    <td class="fw-bold">ООО «МП ТЕРРИТОРИЯ ТЕПЛА»</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Самовывоз:</td>
+                                    <td class="fw-bold text-success">Бесплатно сегодня (с. Майма)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <!-- Преимущества сервиса -->
                     <div class="row g-2 text-muted small mt-auto pt-2 border-top">
                         <div class="col-6 d-flex align-items-center gap-2">
                             <i class="bi bi-shield-check text-warning fs-5"></i>
-                            <span>Гарантия производителя</span>
+                            <span>Заводская гарантия</span>
                         </div>
                         <div class="col-6 d-flex align-items-center gap-2">
-                            <i class="bi bi-tools text-warning fs-5"></i>
-                            <span>Монтаж под ключ</span>
+                            <i class="bi bi-truck text-warning fs-5"></i>
+                            <span>Доставка по РФ</span>
                         </div>
                     </div>
                 </div>
@@ -153,9 +203,9 @@ require_once __DIR__ . '/includes/header.php';
 
         <!-- Подробное описание -->
         <?php if (!empty($product['description'])): ?>
-            <div class="card border-0 shadow-sm rounded-4 p-4 mt-4 bg-white">
-                <h4 class="fw-bold mb-3 text-dark border-bottom pb-2">Описание товара</h4>
-                <div class="text-muted lh-lg">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mt-4 bg-white border">
+                <h4 class="fw-bold mb-3 text-dark border-bottom pb-3">Техническое описание и назначение</h4>
+                <div class="text-muted lh-lg" style="font-size: 0.95rem;">
                     <?= nl2br(htmlspecialchars($product['description'])); ?>
                 </div>
             </div>
