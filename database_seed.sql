@@ -113,15 +113,13 @@ ON DUPLICATE KEY UPDATE
     `description` = VALUES(`description`);
 
 -- 7. ОТЗЫВЫ О МАГАЗИНЕ «ТЕРРИТОРИЯ ТЕПЛА»
-INSERT INTO `site_reviews` (`id`, `user_id`, `author_name`, `rating`, `comment`, `is_approved`, `created_at`) VALUES
-(1, 1, 'Сергей Николаевич', 5, 'Отличный магазин в Майме! Закупали полностью оборудование для отопления дома (котел, радиаторы, трубы). Проконсультировали грамотно, сделали скидку за объем, еще и монтажника сертифицированного подобрали.', 1, NOW() - INTERVAL 15 DAY),
-(2, 1, 'Анна Васильевна', 5, 'Покупали дровяную печь Теплодар для бани. Привезли в тот же день прямо на участок в Кызыл-Озек. Печь отличная, пар легкий, вся семья довольна!', 1, NOW() - INTERVAL 8 DAY),
-(3, 1, 'Игорь М.', 5, 'Грамотные инженеры на складе по ул. Энергетиков 24. Помогли посчитать количество секций радиаторов и подобрать циркуляционный насос. Цены адекватные, в наличии всё есть.', 1, NOW() - INTERVAL 3 DAY)
+INSERT INTO `site_reviews` (`id`, `user_id`, `rating`, `comment`, `created_at`) VALUES
+(1, 1, 5, 'Отличный магазин в Майме! Закупали полностью оборудование для отопления дома (котел, радиаторы, трубы). Проконсультировали грамотно, сделали скидку за объем, еще и монтажника сертифицированного подобрали.', NOW() - INTERVAL 15 DAY),
+(2, 1, 5, 'Покупали дровяную печь Теплодар для бани. Привезли в тот же день прямо на участок в Кызыл-Озек. Печь отличная, пар легкий, вся семья довольна!', NOW() - INTERVAL 8 DAY),
+(3, 1, 5, 'Грамотные инженеры на складе по ул. Энергетиков 24. Помогли посчитать количество секций радиаторов и подобрать циркуляционный насос. Цены адекватные, в наличии всё есть.', NOW() - INTERVAL 3 DAY)
 ON DUPLICATE KEY UPDATE 
-    `author_name` = VALUES(`author_name`),
     `rating` = VALUES(`rating`),
-    `comment` = VALUES(`comment`),
-    `is_approved` = VALUES(`is_approved`);
+    `comment` = VALUES(`comment`);
 
 -- 8. ДОКУМЕНТЫ И СЕРТИФИКАТЫ КОМПАНИИ (ДЛЯ СТРАНИЦЫ «О КОМПАНИИ»)
 INSERT INTO `company_documents` (`id`, `title`, `file_path`, `document_type`, `created_at`) VALUES
@@ -153,5 +151,31 @@ ON DUPLICATE KEY UPDATE
     `image_path` = VALUES(`image_path`),
     `alt_text` = VALUES(`alt_text`),
     `is_main` = VALUES(`is_main`);
+
+-- 10. АКЦИИ И СПЕЦПРЕДЛОЖЕНИЯ
+INSERT INTO `promotions` (`id`, `title`, `description`, `image_path`, `discount_percent`, `start_date`, `end_date`, `is_active`, `sort_order`, `created_at`) VALUES
+(1, 'Скидка 10% на банные печи «Теплодар»', 'При покупке любой дровяной печи для бани «Теплодар» дарим скидку 10% на комплект банных камней (габбро-диабаз/жадеит). Количество акционных комплектов на складе в Майме ограничено!', 'images/categories/cat_stoves.svg', 10, '2025-01-01 00:00:00', '2027-12-31 23:59:59', 1, 1, NOW()),
+(2, 'Сэндвич-дымоход со скидкой 15%', 'При единовременном заказе твердотопливного котла ZOTA предоставляется специальная скидка 15% на трубы и комплектующие дымохода из нержавеющей стали AISI 430/304.', 'images/categories/cat_chimneys.svg', 15, '2025-01-01 00:00:00', '2027-12-31 23:59:59', 1, 2, NOW()),
+(3, 'Бесплатный инженерный расчет котельной', 'Инженеры магазина-склада бесплатно рассчитают теплопотери вашего дома, мощность котла и подберут полную спецификацию с учетом суровых алтайских зим.', 'images/categories/cat_boilers.svg', 0, '2025-01-01 00:00:00', '2027-12-31 23:59:59', 1, 3, NOW())
+ON DUPLICATE KEY UPDATE 
+    `title` = VALUES(`title`),
+    `description` = VALUES(`description`),
+    `image_path` = VALUES(`image_path`),
+    `discount_percent` = VALUES(`discount_percent`),
+    `is_active` = VALUES(`is_active`),
+    `sort_order` = VALUES(`sort_order`);
+
+-- 11. ВИДЕООБЗОРЫ ОБОРУДОВАНИЯ
+INSERT INTO `videos` (`id`, `title`, `video_url`, `description`, `is_active`, `show_on_home`, `sort_order`, `created_at`) VALUES
+(1, 'Обзор твердотопливного котла длительного горения ZOTA Тополь-М', 'https://www.youtube.com/embed/P6gJk8C3_Yg', 'Подробный технический разбор конструкции, чистки теплообменника и работы на угле и дровах в условиях сибирской зимы.', 1, 1, 1, NOW()),
+(2, 'Монтаж банной печи и сэндвич-дымохода по СНиП', 'https://www.youtube.com/embed/aqz-KE-bpKQ', 'Пошаговая установка банной печи с противопожарным проходным узлом перекрытия и правильной теплоизоляцией.', 1, 1, 2, NOW()),
+(3, 'Водяной теплый пол: монтаж смесительного узла и коллектора', 'https://www.youtube.com/embed/kJQP7kiw5Fk', 'Сборка коллекторной группы, подключение циркуляционного насоса и балансировка контуров теплого пола.', 1, 1, 3, NOW())
+ON DUPLICATE KEY UPDATE 
+    `title` = VALUES(`title`),
+    `video_url` = VALUES(`video_url`),
+    `description` = VALUES(`description`),
+    `is_active` = VALUES(`is_active`),
+    `show_on_home` = VALUES(`show_on_home`),
+    `sort_order` = VALUES(`sort_order`);
 
 SET FOREIGN_KEY_CHECKS = 1;

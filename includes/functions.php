@@ -1557,26 +1557,39 @@ function deleteInstallerPortfolioImage($id) {
 }
 
 // Функции для Видео
-function getVideos() {
+function getVideos($limit = null) {
     global $pdo;
-    return $pdo->query("SELECT * FROM videos ORDER BY sort_order ASC")->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $sql = "SELECT * FROM videos WHERE is_active = 1 ORDER BY sort_order ASC, id DESC";
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+        return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
 }
 
 function getVideo($id) {
     global $pdo;
-    $stmt = $pdo->prepare("SELECT * FROM videos WHERE id = ?");
-    $stmt->execute([$id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM videos WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return false;
+    }
 }
 
 function saveVideo($data, $id = null) {
     global $pdo;
+    $url = $data['video_url'] ?? $data['url'] ?? '';
     if ($id) {
-        $stmt = $pdo->prepare("UPDATE videos SET title=?, url=?, description=?, is_active=?, sort_order=? WHERE id=?");
-        return $stmt->execute([$data['title'], $data['url'], $data['description'], $data['is_active'], $data['sort_order'], $id]);
+        $stmt = $pdo->prepare("UPDATE videos SET title=?, video_url=?, description=?, is_active=?, sort_order=? WHERE id=?");
+        return $stmt->execute([$data['title'], $url, $data['description'], $data['is_active'], $data['sort_order'], $id]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO videos (title, url, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)");
-        return $stmt->execute([$data['title'], $data['url'], $data['description'], $data['is_active'], $data['sort_order']]);
+        $stmt = $pdo->prepare("INSERT INTO videos (title, video_url, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)");
+        return $stmt->execute([$data['title'], $url, $data['description'], $data['is_active'], $data['sort_order']]);
     }
 }
 
@@ -2137,7 +2150,6 @@ function getLatestReviews($limit = 3) {
                    u.username, u.first_name, u.last_name 
             FROM site_reviews r 
             LEFT JOIN users u ON r.user_id = u.id 
-            WHERE r.is_approved = 1 
             ORDER BY r.created_at DESC 
             LIMIT ?
         ");
@@ -2165,36 +2177,9 @@ if (!function_exists('getProductMainImage')) {
     }
 }
 
-// Функция получения хитов продаж
-if (!function_exists('getFeaturedProducts')) {
-    function getFeaturedProducts($limit = 4) {
-        global $pdo;
-        try {
-            $stmt = $pdo->prepare("SELECT * FROM products WHERE is_active = 1 AND is_featured = 1 LIMIT ?");
-            $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-}
 
-// Функция получения видео
-if (!function_exists('getVideos')) {
-    function getVideos($limit = 2) {
-        global $pdo;
-        try {
-            // Проверяем наличие таблицы
-            $stmt = $pdo->prepare("SELECT * FROM videos WHERE is_active = 1 ORDER BY created_at DESC LIMIT ?");
-            $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-}
+
+
 
 
 // Функция получения списка монтажников (с лимитом)
@@ -2202,7 +2187,7 @@ if (!function_exists('getInstallersList')) {
     function getInstallersList($limit = 4) {
         global $pdo;
         try {
-            $stmt = $pdo->prepare("SELECT * FROM installers WHERE is_active = 1 ORDER BY rating DESC LIMIT ?");
+            $stmt = $pdo->prepare("SELECT * FROM installers WHERE is_active = 1 ORDER BY average_rating DESC, rating DESC, id ASC LIMIT ?");
             $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

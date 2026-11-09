@@ -25,7 +25,7 @@ include __DIR__ . '/includes/header.php';
             </span>
             <h1 class="display-5 fw-bold text-uppercase mb-2">О компании <span class="text-warning">«Территория Тепла»</span></h1>
             <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
-                Производство и поставка надежных отопительных систем, печей и котлов в Республике Алтай
+                Производство, поставка и профессиональный монтаж отопительного оборудования в Республике Алтай с 1995 года
             </p>
         </div>
     </div>
@@ -39,38 +39,38 @@ include __DIR__ . '/includes/header.php';
             </ol>
         </nav>
         
-        <!-- Основной блок -->
+        <!-- Основной блок производства и истории -->
         <div class="row align-items-center mb-5 g-4 g-lg-5">
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white h-100">
                     <span class="badge bg-warning text-dark text-uppercase mb-2 align-self-start px-3 py-1 fw-bold">
-                        Наш подход
+                        Наш опыт и подход
                     </span>
                     <h2 class="fw-bold mb-3 text-dark">
-                        Инженерная надежность <span class="text-warning">и алтайский опыт</span>
+                        Надежность, проверенная <span class="text-warning">алтайскими зимами</span>
                     </h2>
-                    <p class="lead text-muted small mb-3">Отопительное оборудование, адаптированное к сибирским морозам.</p>
+                    <p class="lead text-muted small mb-3">Мы создаем надежное тепло и уют в ваших домах уже более 30 лет.</p>
                     <p class="text-muted small lh-lg mb-4">
-                        ООО «МП ТЕРРИТОРИЯ ТЕПЛА» специализируется на проектировании, поставке и комплексном монтаже печей для бань и саун, твердотопливных котлов длительного горения, сэндвич-дымоходов из жаростойкой нержавеющей стали и сопутствующего оборудования. Мы гарантируем строгий заводской контроль качества и полное соответствие нормам пожарной безопасности СНиП.
+                        Предприятие начиналось как семейная мастерская печников. Сегодня ООО «МП ТЕРРИТОРИЯ ТЕПЛА» — это крупный магазин-склад и производственно-монтажная база в селе Майма. Мы проектируем и комплектуем банные комплексы, твердотопливные котельные частных усадеб, турбаз и гостиниц Горного Алтая. Каждая единица оборудования проходит строгий контроль качества и соответствует нормам пожарной безопасности СНиП.
                     </p>
                     <div class="row g-3">
                         <div class="col-6">
                             <div class="p-3 bg-dark text-white rounded-4 text-center shadow-sm">
-                                <div class="display-6 fw-bold text-warning">1000+</div>
-                                <div class="small opacity-75">смонтированных печей</div>
+                                <div class="display-6 fw-bold text-warning">30+</div>
+                                <div class="small opacity-75">лет на рынке</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="p-3 bg-warning text-dark rounded-4 text-center shadow-sm">
-                                <div class="display-6 fw-bold">до 5 лет</div>
-                                <div class="small fw-semibold">заводской гарантии</div>
+                                <div class="display-6 fw-bold">15 000+</div>
+                                <div class="small fw-semibold">довольных клиентов</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Фото и склад -->
+            <!-- Фото склада и производства -->
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100 p-3">
                     <div class="ratio ratio-16x9 rounded-3 overflow-hidden bg-light mb-3">
@@ -79,7 +79,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="p-3">
                         <h5 class="fw-bold text-dark mb-1">Собственный магазин-склад в Майме</h5>
                         <p class="text-muted small mb-0">
-                            Всегда в наличии сэндвич-трубы, отводы, шиберы, переходники, термоизоляция и комплектующие для оперативной отгрузки в день обращения.
+                            Всегда в наличии сэндвич-трубы всех диаметров из жаропрочной стали AISI 430/304, переходники, термоизоляция (базальт, минерит) и котлы длительного горения с оперативной отгрузкой в день обращения.
                         </p>
                     </div>
                 </div>
@@ -93,7 +93,7 @@ include __DIR__ . '/includes/header.php';
                     <h4 class="fw-bold mb-1 text-dark">
                         <i class="bi bi-patch-check-fill text-warning me-2"></i> Официальные реквизиты компании
                     </h4>
-                    <p class="text-muted small mb-0">Все продажи и договоры поставки оформляются официально с предоставлением кассовых чеков</p>
+                    <p class="text-muted small mb-0">Все продажи и договоры поставки оформляются официально с предоставлением кассовых чеков и гарантии</p>
                 </div>
                 <span class="badge bg-dark text-warning px-3 py-2 rounded-pill fs-6">ООО «МП ТЕРРИТОРИЯ ТЕПЛА»</span>
             </div>
@@ -117,18 +117,18 @@ include __DIR__ . '/includes/header.php';
                 <div class="col-md-4">
                     <div class="p-3 bg-light rounded-3 h-100 border">
                         <div class="text-muted mb-1">Адрес магазина-склада:</div>
-                        <div class="text-dark">649100, Республика Алтай, Майминский р-н, с. Майма, ул. Энергетиков, д. 24</div>
+                        <div class="text-dark">649100, Республика Алтай, Майминский р-н, с. Майма, ул. Ленина, д. 1/1, Офис 4 (ул. Энергетиков, 24)</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Сертификаты и лицензии -->
-        <div id="documents" class="pt-2">
+        <div id="documents" class="pt-2 mb-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h3 class="h4 fw-bold text-dark mb-0">Сертификаты и документация</h3>
-                    <small class="text-muted">Официальные документы качества на продукцию</small>
+                    <small class="text-muted">Официальные документы качества, дипломы и дилерские сертификаты</small>
                 </div>
                 <span class="badge bg-dark rounded-pill px-3 py-2"><?= count($document_images) ?> документов</span>
             </div>
@@ -140,19 +140,19 @@ include __DIR__ . '/includes/header.php';
                     ?>
                         <div class="col-6 col-sm-4 col-md-3">
                             <a href="<?= htmlspecialchars($docFile); ?>"
-                               class="glightbox"
-                               data-gallery="documents-gallery"
-                               data-title="<?= htmlspecialchars($doc['title'] ?? 'Документ'); ?>">
-                                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+                                class="glightbox text-decoration-none"
+                                data-gallery="documents-gallery"
+                                data-title="<?= htmlspecialchars($doc['title'] ?? 'Документ'); ?>">
+                                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white" style="transition: transform 0.2s ease;">
                                     <div class="ratio ratio-1x1 p-3 bg-light">
                                         <img src="<?= htmlspecialchars($docFile); ?>"
                                              class="img-fluid object-fit-contain w-100 h-100"
                                              alt="<?= htmlspecialchars($doc['title'] ?? 'Документ'); ?>"
-                                             onerror="this.src='images/documents/logo.jpg'">
+                                             onerror="this.src='images/hero-bg.jpg'">
                                     </div>
                                     <div class="p-3 text-center border-top">
                                         <small class="text-truncate d-block fw-semibold text-dark"><?= htmlspecialchars($doc['title'] ?? 'Сертификат'); ?></small>
-                                        <span class="badge bg-warning-subtle text-dark border small mt-1">Сертификат</span>
+                                        <span class="badge bg-warning text-dark small mt-1">Сертификат</span>
                                     </div>
                                 </div>
                             </a>
@@ -162,9 +162,22 @@ include __DIR__ . '/includes/header.php';
             <?php else: ?>
                 <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted bg-white">
                     <i class="bi bi-file-earmark-check fs-1 mb-2 text-warning"></i>
-                    <p class="mb-0">Сертификаты соответствия предоставляются по запросу покупателя</p>
+                    <p class="mb-0">Сертификаты соответствия ГОСТ и пожарной безопасности предоставляются по запросу покупателя</p>
                 </div>
             <?php endif; ?>
+        </div>
+
+        <!-- Интерактивная карта расположения склада (как в оригинале) -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center" style="background: var(--dark-main, #181c20); color: #fff;">
+                <h5 class="mb-0 fw-bold fs-6 text-white">
+                    <i class="bi bi-geo-alt-fill text-warning me-2"></i> Расположение центрального магазина-склада в с. Майма
+                </h5>
+                <span class="badge bg-warning text-dark">ул. Ленина 1/1 / ул. Энергетиков 24</span>
+            </div>
+            <div class="card-body p-0">
+                <iframe src="https://yandex.ru/map-widget/v1/?ll=85.905756%2C52.004100&z=17&pt=85.905756%2C52.004100" width="100%" height="450" frameborder="0" loading="lazy" style="border:0; display:block;"></iframe>
+            </div>
         </div>
 
     </div>

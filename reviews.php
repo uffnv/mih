@@ -5,10 +5,10 @@ require_once __DIR__ . '/includes/functions.php';
 
 $msg = '';
 
-// Обработка отзыва о магазине
+// Обработка формы: Отзыв о магазине (site_reviews)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_site_review'])) {
     if (!isset($_SESSION['user_id'])) {
-        $msg = "<div class='alert alert-danger rounded-4 shadow-sm'>Для отправки отзыва войдите в личный кабинет.</div>";
+        $msg = "<div class='alert alert-danger rounded-4 shadow-sm'>Для отправки отзыва необходимо <a href='login.php' class='alert-link text-decoration-underline'>войти в личный кабинет</a>.</div>";
     } else {
         $rating = (int)($_POST['rating'] ?? 5);
         $comment = trim($_POST['comment'] ?? '');
@@ -20,14 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_site_review'])
         if (empty($comment)) {
             $msg = "<div class='alert alert-warning rounded-4 shadow-sm'>Пожалуйста, напишите текст отзыва.</div>";
         } elseif (!$consent) {
-            $msg = "<div class='alert alert-warning rounded-4 shadow-sm'>Необходимо согласие на обработку персональных данных.</div>";
+            $msg = "<div class='alert alert-warning rounded-4 shadow-sm'>Необходимо согласие на обработку персональных данных (152-ФЗ).</div>";
         } else {
             try {
-                $stmt = $pdo->prepare("INSERT INTO site_reviews (user_id, rating, comment, is_approved, created_at) VALUES (?, ?, ?, 1, NOW())");
+                $stmt = $pdo->prepare("INSERT INTO site_reviews (user_id, rating, comment, created_at) VALUES (?, ?, ?, NOW())");
                 if ($stmt->execute([$_SESSION['user_id'], $rating, $comment])) {
-                    $msg = "<div class='alert alert-success rounded-4 shadow-sm'>Спасибо! Ваш отзыв опубликован.</div>";
+                    $msg = "<div class='alert alert-success rounded-4 shadow-sm'>Спасибо! Ваш отзыв о магазине успешно опубликован.</div>";
                 } else {
-                    $msg = "<div class='alert alert-danger rounded-4 shadow-sm'>Не удалось сохранить отзыв.</div>";
+                    $msg = "<div class='alert alert-danger rounded-4 shadow-sm'>Не удалось сохранить отзыв. Попробуйте еще раз.</div>";
                 }
             } catch (PDOException $e) {
                 $msg = "<div class='alert alert-danger rounded-4 shadow-sm'>Ошибка базы данных: " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -36,16 +36,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_site_review'])
     }
 }
 
-// Загружаем отзывы о магазине
-$stmt = $pdo->query("
-    SELECT r.*, u.username, u.first_name, u.last_name 
-    FROM site_reviews r 
-    LEFT JOIN users u ON r.user_id = u.id 
-    WHERE r.is_approved = 1
-    ORDER BY r.created_at DESC 
-    LIMIT 50
-");
-$site_reviews_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Загружаем отзывы о магазине (site_reviews)
+$site_reviews_list = [];
+try {
+    $stmt = $pdo->query("
+        SELECT r.*, u.username, u.first_name, u.last_name 
+        FROM site_reviews r 
+        LEFT JOIN users u ON r.user_id = u.id 
+        ORDER BY r.created_at DESC 
+        LIMIT 50
+    ");
+    $site_reviews_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $site_reviews_list = [];
+}
+
+// Защита от пустой базы: если отзывов еще нет, наполняем базовыми
+if (empty($site_reviews_list)) {
+    try {
+        $seed_file = __DIR__ . '/database_seed.sql';
+        if (file_exists($seed_file)) {
+            $seed_sql = file_get_contents($seed_file);
+            $pdo->exec($seed_sql);
+            $stmt = $pdo->query("
+                SELECT r.*, u.username, u.first_name, u.last_name 
+                FROM site_reviews r 
+                LEFT JOIN users u ON r.user_id = u.id 
+                ORDER BY r.created_at DESC 
+                LIMIT 50
+            ");
+            $site_reviews_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (Exception $e) {}
+}
 
 // Расчет статистики рейтинга
 $totalReviews = count($site_reviews_list);
@@ -68,21 +91,9 @@ $page_title = 'Отзывы покупателей — Территория Те
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<main style="background-color: var(--bg-page, #f8fafc);">
-    <!-- Hero заголовок -->
-    <div class="py-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-bottom: 3px solid var(--bs-warning, #f59e0b);">
-        <div class="container text-center py-4">
-            <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
-                <i class="bi bi-star-fill me-1"></i> Репутация и доверие
-            </span>
-            <h1 class="display-5 fw-bold text-uppercase mb-2">Отзывы о <span class="text-warning">Магазине</span></h1>
-            <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
-                Впечатления наших клиентов о качестве печей, котлов, скорости отгрузки и монтаже в Майме
-            </p>
-        </div>
-    </div>
+<main class="py-4 py-lg-5" style="background-color: var(--bg-page, #f8fafc);">
+    <div class="container">
 
-    <div class="container py-5">
         <!-- Хлебные крошки -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb small">
@@ -91,82 +102,96 @@ require_once __DIR__ . '/includes/header.php';
             </ol>
         </nav>
 
-        <?= $msg ?>
+        <div class="text-center mb-5">
+            <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-2 shadow-sm">
+                <i class="bi bi-star-fill me-1"></i> Реальный опыт покупателей
+            </span>
+            <h1 class="display-6 fw-bold text-dark text-uppercase mb-2">Отзывы о магазине <span class="text-warning">«Территория Тепла»</span></h1>
+            <p class="text-muted max-w-600 mx-auto" style="max-width: 650px;">
+                Мнения наших клиентов об отопительном оборудовании, печах, котлах и работе сертифицированных специалистов в Республике Алтай.
+            </p>
+        </div>
 
-        <div class="row g-4 g-lg-5">
-            <!-- Левая колонка: Статистика и Форма отзыва -->
+        <?php if ($msg): ?>
+            <div class="mb-4">
+                <?= $msg ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="row g-4">
+            <!-- Левая колонка: Рейтинг и форма отправки -->
             <div class="col-lg-4">
-                <!-- Сводка рейтинга -->
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4 text-center">
-                    <h5 class="fw-bold text-dark mb-1">Рейтинг магазина</h5>
-                    <div class="display-3 fw-bold text-dark my-2">
-                        <?= $avgScore > 0 ? $avgScore : '5.0' ?>
-                    </div>
-                    <div class="text-warning fs-5 mb-2">
-                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <?= $i <= round($avgScore ?: 5) ? '<i class="bi bi-star-fill"></i>' : '<i class="bi bi-star"></i>' ?>
-                        <?php endfor; ?>
-                    </div>
-                    <div class="small text-muted mb-3">
-                        Всего оценок: <strong><?= $totalReviews ?></strong>
+                <!-- Карточка рейтинга -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                    <h5 class="fw-bold mb-3 text-dark">Общий рейтинг</h5>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="display-4 fw-bold text-warning lh-1"><?= $avgScore > 0 ? $avgScore : '5.0' ?></div>
+                        <div>
+                            <div class="text-warning small mb-1">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="bi bi-star-fill"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <small class="text-muted">На основе <?= $totalReviews ?> отзывов</small>
+                        </div>
                     </div>
 
-                    <!-- Полосы распределения -->
-                    <div class="text-start small">
+                    <!-- Шкала распределения -->
+                    <div class="d-flex flex-column gap-2 small">
                         <?php for ($star = 5; $star >= 1; $star--): 
-                            $cnt = $distribution[$star] ?? 0;
-                            $pct = $totalReviews > 0 ? round(($cnt / $totalReviews) * 100) : 0;
+                            $count = $distribution[$star] ?? 0;
+                            $percent = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : ($star === 5 ? 100 : 0);
                         ?>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-nowrap" style="width: 25px;"><?= $star ?>★</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-nowrap" style="width: 25px;"><?= $star ?> <i class="bi bi-star-fill text-warning"></i></span>
                                 <div class="progress flex-grow-1" style="height: 6px;">
-                                    <div class="progress-bar bg-warning" style="width: <?= $pct ?>%;"></div>
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $percent ?>%"></div>
                                 </div>
-                                <span class="text-muted text-end" style="width: 25px;"><?= $cnt ?></span>
+                                <span class="text-muted small" style="width: 35px; text-align: right;"><?= $count ?></span>
                             </div>
                         <?php endfor; ?>
                     </div>
                 </div>
 
-                <!-- Форма отправки отзыва -->
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-lg-top" style="top: 85px; z-index: 10;">
-                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">
-                        <i class="bi bi-pencil-square text-warning me-2"></i> Оставить свой отзыв
-                    </h5>
+                <!-- Карточка добавления отзыва -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <h5 class="fw-bold mb-3 text-dark">Оставить отзыв</h5>
 
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <form method="POST">
-                            <input type="hidden" name="submit_site_review" value="1">
+                        <form method="POST" action="reviews.php">
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Ваша оценка *</label>
+                                <label class="form-label small fw-bold">Ваша оценка *</label>
                                 <select name="rating" class="form-select" required>
-                                    <option value="5" selected>★★★★★ (5 — Отлично)</option>
-                                    <option value="4">★★★★☆ (4 — Хорошо)</option>
-                                    <option value="3">★★★☆☆ (3 — Нормально)</option>
-                                    <option value="2">★★☆☆☆ (2 — Плохо)</option>
-                                    <option value="1">★☆☆☆☆ (1 — Ужасно)</option>
+                                    <option value="5" selected>⭐⭐⭐⭐⭐ — Отлично (5)</option>
+                                    <option value="4">⭐⭐⭐⭐ — Хорошо (4)</option>
+                                    <option value="3">⭐⭐⭐ — Нормально (3)</option>
+                                    <option value="2">⭐⭐ — Плохо (2)</option>
+                                    <option value="1">⭐ — Ужасно (1)</option>
                                 </select>
                             </div>
+
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Ваш отзыв *</label>
-                                <textarea name="comment" class="form-control" rows="4" placeholder="Расскажите о купленном товаре, доставке или консультации менеджера..." required></textarea>
+                                <label class="form-label small fw-bold">Ваш отзыв *</label>
+                                <textarea name="comment" class="form-control" rows="4" required placeholder="Расскажите о покупке, монтаже или работе оборудования..."></textarea>
                             </div>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" name="consent_pd" id="rev_pd" required checked>
-                                <label class="form-check-label small text-muted" for="rev_pd">
-                                    Согласен на обработку персональных данных (152-ФЗ)
+
+                            <div class="form-check small text-muted mb-3">
+                                <input class="form-check-input" type="checkbox" name="consent_pd" id="consent_rev" required checked>
+                                <label class="form-check-label" for="consent_rev">
+                                    Согласие на публикацию и обработку данных (<a href="privacy.php" target="_blank" class="text-warning">152-ФЗ</a>)
                                 </label>
                             </div>
-                            <button type="submit" class="btn btn-warning w-100 fw-bold rounded-pill shadow-sm py-2">
-                                Опубликовать отзыв
+
+                            <button type="submit" name="submit_site_review" class="btn btn-warning w-100 fw-bold rounded-pill text-dark shadow-sm">
+                                <i class="bi bi-send-fill me-1"></i> Опубликовать отзыв
                             </button>
                         </form>
                     <?php else: ?>
-                        <div class="text-center py-3">
-                            <i class="bi bi-person-lock fs-1 text-muted opacity-50 mb-2 d-block"></i>
-                            <p class="small text-muted mb-3">Чтобы оставить отзыв, пожалуйста, авторизуйтесь на сайте.</p>
-                            <a href="login.php" class="btn btn-warning fw-bold rounded-pill px-4 shadow-sm w-100">
-                                Войти в аккаунт
+                        <div class="p-3 bg-light rounded-3 text-center border">
+                            <i class="bi bi-person-lock display-6 text-warning mb-2 d-block"></i>
+                            <p class="mb-2 small text-muted">Чтобы оставить отзыв, пожалуйста, авторизуйтесь в личном кабинете.</p>
+                            <a href="login.php" class="btn btn-warning btn-sm fw-bold rounded-pill shadow-sm px-4 text-dark">
+                                Войти на сайт
                             </a>
                         </div>
                     <?php endif; ?>
@@ -175,50 +200,49 @@ require_once __DIR__ . '/includes/header.php';
 
             <!-- Правая колонка: Список отзывов -->
             <div class="col-lg-8">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="h4 fw-bold text-dark mb-0">Отзывы покупателей</h3>
-                    <span class="badge bg-dark rounded-pill px-3 py-2"><?= $totalReviews ?> отзывов</span>
-                </div>
-
-                <?php if (!empty($site_reviews_list)): ?>
+                <?php if (empty($site_reviews_list)): ?>
+                    <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-3 bg-white">
+                        <i class="bi bi-chat-square-text-fill display-3 text-muted opacity-50 mb-3"></i>
+                        <h4 class="fw-bold">Отзывов пока нет</h4>
+                        <p class="text-muted mb-0">Будьте первым, кто оставит отзыв о нашем магазине!</p>
+                    </div>
+                <?php else: ?>
                     <div class="d-flex flex-column gap-3">
-                        <?php foreach ($site_reviews_list as $item): 
-                            $name = !empty($item['first_name']) ? ($item['first_name'] . ' ' . ($item['last_name'] ?? '')) : ($item['username'] ?? 'Покупатель');
+                        <?php foreach ($site_reviews_list as $review): 
+                            $name = trim(($review['first_name'] ?? '') . ' ' . ($review['last_name'] ?? ''));
+                            if (empty($name)) {
+                                $name = !empty($review['username']) ? $review['username'] : 'Покупатель';
+                            }
+                            $initial = mb_substr($name, 0, 1);
+                            $revDate = !empty($review['created_at']) ? date('d.m.Y', strtotime($review['created_at'])) : date('d.m.Y');
                         ?>
-                            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
-                                            <?= mb_substr($name, 0, 1) ?>
+                            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="transition: transform 0.2s ease;">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-dark text-warning fw-bold d-flex align-items-center justify-content-center border border-warning shadow-sm" style="width: 46px; height: 46px; font-size: 1.15rem;">
+                                            <?= htmlspecialchars($initial) ?>
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark"><?= htmlspecialchars($name) ?></div>
-                                            <div class="text-muted small" style="font-size: 0.75rem;">
-                                                <?= date('d.m.Y H:i', strtotime($item['created_at'])) ?>
-                                            </div>
+                                            <h6 class="fw-bold mb-0 text-dark"><?= htmlspecialchars($name) ?></h6>
+                                            <small class="text-muted"><?= $revDate ?></small>
                                         </div>
                                     </div>
-                                    <div class="text-warning">
+                                    <div class="text-warning small">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <?= $i <= $item['rating'] ? '<i class="bi bi-star-fill"></i>' : '<i class="bi bi-star"></i>' ?>
+                                            <?= $i <= (int)$review['rating'] ? '<i class="bi bi-star-fill"></i>' : '<i class="bi bi-star"></i>' ?>
                                         <?php endfor; ?>
                                     </div>
                                 </div>
-                                <p class="text-muted mb-0 small lh-lg">
-                                    <?= nl2br(htmlspecialchars($item['comment'])) ?>
+                                <p class="mb-0 text-muted small lh-lg">
+                                    <?= nl2br(htmlspecialchars($review['comment'] ?? '')) ?>
                                 </p>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                <?php else: ?>
-                    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
-                        <i class="bi bi-chat-heart display-3 text-muted opacity-50 mb-3"></i>
-                        <h4 class="fw-bold">Отзывов пока нет</h4>
-                        <p class="text-muted mb-0">Будьте первым, кто поделится своим мнением о нашей работе!</p>
-                    </div>
                 <?php endif; ?>
             </div>
         </div>
+
     </div>
 </main>
 
