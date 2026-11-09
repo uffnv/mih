@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = "Вход в кабинет — Михаил Потапыч";
+$page_title = "Вход в кабинет — Территория Тепла";
 require_once __DIR__ . '/includes/header.php';
 ?>
 

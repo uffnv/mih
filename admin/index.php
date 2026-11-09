@@ -1,6 +1,6 @@
 <?php
 require_once '../includes/config.php';
-$page_title = 'Панель управления';
+$page_title = 'Панель управления — Территория Тепла';
 require_once 'admin_header.php';
 
 // Статистика
@@ -13,8 +13,11 @@ $total_revenue = (float)$stmt->fetchColumn();
 $stmt = $pdo->query("SELECT COUNT(*) FROM products");
 $total_products = (int)$stmt->fetchColumn();
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM reviews WHERE is_approved = 0");
+$stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews WHERE is_approved = 0");
 $pending_reviews = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->query("SELECT COUNT(*) FROM installer_applications WHERE status = 'new'");
+$pending_installer_apps = (int)$stmt->fetchColumn();
 
 $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer' OR role = 'user'");
 $users_count = (int)$stmt->fetchColumn();
@@ -30,7 +33,7 @@ $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">
     <div>
         <h1 class="h3 fw-bold text-dark mb-0">Панель управления</h1>
-        <small class="text-muted">Общая статистика и сводка интернет-магазина</small>
+        <small class="text-muted">Общая статистика и оперативная сводка магазина «Территория Тепла»</small>
     </div>
     <div class="btn-toolbar mb-2 mb-md-0 gap-2">
         <a href="product_edit.php" class="btn btn-warning fw-bold shadow-sm rounded-pill px-3">
@@ -81,9 +84,9 @@ $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="card admin-card bg-white h-100 p-3">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <div class="text-muted small fw-bold text-uppercase">Товаров в базе</div>
+                    <div class="text-muted small fw-bold text-uppercase">Товаров в каталоге</div>
                     <h3 class="fw-bold mb-0 text-dark mt-1"><?= $total_products ?></h3>
-                    <a href="products.php" class="small text-decoration-none text-primary fw-bold">Перейти в каталог &rarr;</a>
+                    <a href="products.php" class="small text-decoration-none text-primary fw-bold">Каталог товаров &rarr;</a>
                 </div>
                 <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                     <i class="bi bi-box-seam fs-4"></i>
@@ -110,34 +113,49 @@ $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <!-- Оповещения требующие внимания -->
-<?php if ($pending_reviews > 0 || $unread_requests > 0): ?>
+<?php if ($pending_reviews > 0 || $pending_installer_apps > 0 || $unread_requests > 0): ?>
     <div class="row g-3 mb-4">
-        <?php if ($pending_reviews > 0): ?>
-            <div class="col-md-6">
+        <?php if ($pending_installer_apps > 0): ?>
+            <div class="col-md-4">
                 <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex justify-content-between align-items-center mb-0 p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-chat-dots-fill fs-3 text-warning"></i>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-plus-fill fs-3 text-warning"></i>
                         <div>
-                            <div class="fw-bold text-dark">Новые отзывы о товарах (<?= $pending_reviews ?>)</div>
-                            <small class="text-muted">Ожидают проверки и публикации на сайте</small>
+                            <div class="fw-bold text-dark">Анкеты мастеров (<?= $pending_installer_apps ?>)</div>
+                            <small class="text-muted">Новые заявки на партнерство</small>
                         </div>
                     </div>
-                    <a href="reviews.php" class="btn btn-warning btn-sm fw-bold rounded-pill px-3">Модерация</a>
+                    <a href="installer_applications.php" class="btn btn-warning btn-sm fw-bold rounded-pill px-3">Анкеты</a>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($pending_reviews > 0): ?>
+            <div class="col-md-4">
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex justify-content-between align-items-center mb-0 p-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-chat-dots-fill fs-3 text-warning"></i>
+                        <div>
+                            <div class="fw-bold text-dark">Отзывы о товарах (<?= $pending_reviews ?>)</div>
+                            <small class="text-muted">Ожидают модерации</small>
+                        </div>
+                    </div>
+                    <a href="reviews.php" class="btn btn-dark btn-sm fw-bold rounded-pill px-3">Проверить</a>
                 </div>
             </div>
         <?php endif; ?>
 
         <?php if ($unread_requests > 0): ?>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="alert alert-info border-0 shadow-sm rounded-4 d-flex justify-content-between align-items-center mb-0 p-3">
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-envelope-exclamation-fill fs-3 text-info"></i>
                         <div>
-                            <div class="fw-bold text-dark">Новые сообщения с формы контактов (<?= $unread_requests ?>)</div>
-                            <small class="text-muted">Клиенты оставили заявки на обратную связь</small>
+                            <div class="fw-bold text-dark">Заявки с сайта (<?= $unread_requests ?>)</div>
+                            <small class="text-muted">Вопросы с формы контактов</small>
                         </div>
                     </div>
-                    <a href="contact_requests.php" class="btn btn-info btn-sm text-dark fw-bold rounded-pill px-3">Просмотреть</a>
+                    <a href="contact_requests.php" class="btn btn-info btn-sm text-dark fw-bold rounded-pill px-3">Открыть</a>
                 </div>
             </div>
         <?php endif; ?>
@@ -148,7 +166,7 @@ $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
     <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 fw-bold fs-6">
-            <i class="bi bi-clock-history text-warning me-2"></i>Последние поступившие заказы
+            <i class="bi bi-clock-history text-warning me-2"></i> Последние поступившие заказы
         </h5>
         <a href="orders.php" class="btn btn-sm btn-outline-warning rounded-pill px-3">Все заказы</a>
     </div>
@@ -204,7 +222,7 @@ $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
                                 <td>
                                     <?php if (!empty($order['customer_phone'])): ?>
-                                        <a href="tel:<?= htmlspecialchars($order['customer_phone']); ?>" class="text-decoration-none text-dark">
+                                        <a href="tel:<?= htmlspecialchars($order['customer_phone']); ?>" class="text-decoration-none text-dark fw-semibold">
                                             <?= htmlspecialchars($order['customer_phone']); ?>
                                         </a>
                                     <?php else: ?>

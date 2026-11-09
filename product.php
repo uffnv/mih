@@ -29,7 +29,7 @@ if (!file_exists(__DIR__ . '/' . $main_image)) {
     $main_image = 'images/no-photo.jpg';
 }
 
-$page_title = htmlspecialchars($product['name']) . ' — Михаил Потапыч';
+$page_title = htmlspecialchars($product['name']) . ' — Территория Тепла';
 require_once __DIR__ . '/includes/header.php';
 ?>
 

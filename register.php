@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = "Регистрация";
+$page_title = "Регистрация — Территория Тепла";
 require_once __DIR__ . '/includes/header.php';
 ?>
 

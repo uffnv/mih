@@ -3,107 +3,110 @@ session_start();
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 
-$page_title = "Контакты — Михаил Потапыч";
+$page_title = "Контакты и склад — Территория Тепла";
 $success_msg = "";
 $error_msg = "";
 
 // Обработка формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $phone = trim($_POST['phone']);
-    $message = trim($_POST['message']);
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $message = trim($_POST['message'] ?? '');
+    $consent = isset($_POST['consent_pd']);
 
-    if (empty($name) || empty($email) || empty($message)) {
-        $error_msg = "Пожалуйста, заполните все обязательные поля.";
+    if (empty($name) || empty($phone) || empty($message)) {
+        $error_msg = "Пожалуйста, заполните обязательные поля (Имя, Телефон, Сообщение).";
+    } elseif (!$consent) {
+        $error_msg = "Необходимо согласие на обработку персональных данных (152-ФЗ).";
     } else {
-        // Сохранение в БД
-        $stmt = $pdo->prepare("INSERT INTO contact_requests (name, email, phone, message) VALUES (?, ?, ?, ?)");
-        if ($stmt->execute([$name, $email, $phone, $message])) {
-            $success_msg = "Ваше сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.";
-        } else {
-            $error_msg = "Ошибка при отправке сообщения. Попробуйте позже.";
+        try {
+            $stmt = $pdo->prepare("INSERT INTO contact_requests (name, email, phone, message, status, created_at) VALUES (?, ?, ?, ?, 'new', NOW())");
+            if ($stmt->execute([$name, $email, $phone, $message])) {
+                $success_msg = "Ваше сообщение успешно отправлено! Специалист склада свяжется с вами в течение 15 минут.";
+            } else {
+                $error_msg = "Ошибка при отправке сообщения. Пожалуйста, позвоните нам по телефону.";
+            }
+        } catch (Exception $e) {
+            $error_msg = "Ошибка отправки: " . $e->getMessage();
         }
     }
 }
 include __DIR__ . '/includes/header.php';
 ?>
 
-<main class="bg-light">
+<main style="background-color: var(--bg-page, #f8fafc);">
     <!-- Hero заголовок -->
-    <div class="hero-gradient text-white py-5">
-        <div class="container text-center py-3">
-            <h1 class="display-5 fw-bold text-uppercase mb-2">Контакты и <span class="text-warning">магазины</span></h1>
-            <p class="lead text-white-50 mb-0">Ответим на любые вопросы по отоплению и поможем с выбором оборудования</p>
+    <div class="py-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-bottom: 3px solid var(--bs-warning, #f59e0b);">
+        <div class="container text-center py-4">
+            <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
+                <i class="bi bi-geo-alt-fill me-1"></i> Прямая связь со складом
+            </span>
+            <h1 class="display-5 fw-bold text-uppercase mb-2">Контакты и <span class="text-warning">магазин-склад</span></h1>
+            <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
+                Ответим на любые технические вопросы, рассчитаем диаметр дымохода и поможем подобрать оборудование
+            </p>
         </div>
     </div>
 
     <div class="container py-5">
-        <div class="row g-4 g-lg-5">
-            
+        <!-- Хлебные крошки -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="index.php" class="text-decoration-none text-muted">Главная</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Контакты</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4 g-lg-5 mb-5">
             <!-- Контактная информация -->
             <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white h-100">
                     <h4 class="fw-bold mb-4 text-dark border-bottom pb-2">
-                        <i class="bi bi-geo-alt-fill text-warning me-2"></i>Наши контакты
+                        <i class="bi bi-building-fill-check text-warning me-2"></i> Отдел продаж и склад
                     </h4>
                     
-                    <!-- Адреса магазинов -->
-                    <div class="contact-item d-flex align-items-start mb-3">
-                        <div class="feature-icon-box flex-shrink-0 me-3">
-                            <i class="bi bi-shop"></i>
+                    <!-- Адрес склада -->
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 44px; height: 44px;">
+                            <i class="bi bi-geo-alt-fill fs-5"></i>
                         </div>
                         <div>
-                            <h6 class="fw-bold mb-2 text-dark">Адреса магазинов и складов</h6>
-                            <div class="mb-2">
-                                <span class="badge bg-warning text-dark me-1">Магазин 1 (Склад)</span>
-                                <div class="text-dark small fw-medium mt-1">с. Майма, ул. Ленина, д. 1/1 (1/2), Офис 4</div>
-                            </div>
-                            <div>
-                                <span class="badge bg-dark text-white me-1">Магазин 2</span>
-                                <div class="text-dark small fw-medium mt-1">г. Горно-Алтайск, ул. Чорос-Гуркина, 9А (ТЦ «Кристалл»)</div>
+                            <h6 class="fw-bold mb-1 text-dark">Основной магазин-склад (Майма)</h6>
+                            <div class="text-muted small">Республика Алтай, с. Майма, ул. Энергетиков, д. 24</div>
+                            <div class="small text-warning fw-semibold mt-1">
+                                <i class="bi bi-clock me-1"></i> Пн–Сб: 09:00 – 18:00 (Вс: выходной)
                             </div>
                         </div>
                     </div>
 
                     <!-- Телефоны -->
-                    <div class="contact-item d-flex align-items-start mb-3">
-                        <div class="feature-icon-box flex-shrink-0 me-3">
-                            <i class="bi bi-telephone-fill"></i>
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 44px; height: 44px;">
+                            <i class="bi bi-telephone-fill fs-5"></i>
                         </div>
                         <div>
-                            <h6 class="fw-bold mb-1 text-dark">Телефоны отдела продаж</h6>
-                            <p class="text-muted small mb-0">
-                                <a href="tel:+79136914443" class="text-decoration-none text-dark fw-bold d-block fs-6">+7 (913) 691-44-43</a>
-                                <a href="tel:89609681000" class="text-decoration-none text-muted d-block small">8-960-968-1000</a>
-                                <span class="text-muted small mt-1 d-block"><i class="bi bi-clock me-1"></i>Пн-Пт 9:00 - 18:00, Сб 10:00 - 16:00</span>
-                            </p>
+                            <h6 class="fw-bold mb-1 text-dark">Прямой телефон склада</h6>
+                            <a href="tel:+79136914443" class="text-decoration-none text-dark fw-bold d-block fs-5">+7 (913) 691-44-43</a>
+                            <span class="text-muted small">Звонки по всей Республике Алтай и краю</span>
                         </div>
                     </div>
 
                     <!-- Email -->
-                    <div class="contact-item d-flex align-items-start mb-3">
-                        <div class="feature-icon-box flex-shrink-0 me-3">
-                            <i class="bi bi-envelope-fill"></i>
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 44px; height: 44px;">
+                            <i class="bi bi-envelope-fill fs-5"></i>
                         </div>
                         <div>
                             <h6 class="fw-bold mb-1 text-dark">Электронная почта</h6>
-                            <p class="text-muted small mb-0">
-                                <a href="mailto:mpterritoriatepla@yandex.ru" class="text-decoration-none text-dark fw-bold d-block">mpterritoriatepla@yandex.ru</a>
-                                <a href="mailto:admin561245@territoriatepla.ru" class="text-decoration-none text-dark d-block small">admin561245@territoriatepla.ru</a>
-                                <a href="mailto:amips@mail.ru" class="text-decoration-none text-muted d-block small">amips@mail.ru</a>
-                            </p>
+                            <a href="mailto:mpterritoriatepla@yandex.ru" class="text-decoration-none text-dark fw-semibold d-block">mpterritoriatepla@yandex.ru</a>
+                            <small class="text-muted">Для счетов, договоров и проектов котельных</small>
                         </div>
                     </div>
 
-                    <hr class="my-3">
-
-                    <h6 class="fw-bold mb-3 text-dark">Связь через мессенджеры</h6>
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Иконка MAX -->
-                        <a href="#" class="messenger-btn bg-warning text-dark fw-bold" title="Мессенджер MAX">
-                            <span style="font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px;">MAX</span>
-                        </a>
+                    <div class="p-3 bg-light rounded-3 mt-auto">
+                        <small class="text-muted d-block mb-1"><strong>Реквизиты:</strong> ООО «МП ТЕРРИТОРИЯ ТЕПЛА»</small>
+                        <small class="text-muted d-block">ИНН 0411174476 | ОГРН 1150411003808</small>
                     </div>
                 </div>
             </div>
@@ -112,179 +115,70 @@ include __DIR__ . '/includes/header.php';
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white h-100">
                     <h4 class="fw-bold mb-4 text-dark border-bottom pb-2">
-                        <i class="bi bi-chat-left-dots-fill text-warning me-2"></i>Напишите нам
+                        <i class="bi bi-chat-left-dots-fill text-warning me-2"></i> Задать вопрос инженеру склада
                     </h4>
                     
                     <?php if ($success_msg): ?>
-                        <div class="alert alert-success d-flex align-items-center rounded-3 mb-4" role="alert">
-                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                            <div><?= htmlspecialchars($success_msg) ?></div>
+                        <div class="alert alert-success d-flex align-items-center rounded-4 mb-4 shadow-sm" role="alert">
+                            <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                            <div><?= htmlspecialchars($success_msg); ?></div>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($error_msg): ?>
-                        <div class="alert alert-danger d-flex align-items-center rounded-3 mb-4" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-                            <div><?= htmlspecialchars($error_msg) ?></div>
+                        <div class="alert alert-danger d-flex align-items-center rounded-4 mb-4 shadow-sm" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
+                            <div><?= htmlspecialchars($error_msg); ?></div>
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="contacts.php">
-                        <div class="row g-3">
+                    <form method="POST">
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label for="name" class="form-label fw-bold small text-uppercase text-muted">Ваше имя *</label>
-                                <input type="text" class="form-control bg-light" id="name" name="name" placeholder="Иван Иванов" required>
+                                <label class="form-label small fw-bold text-muted text-uppercase">Ваше имя *</label>
+                                <input type="text" name="name" class="form-control" placeholder="Иван" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="phone" class="form-label fw-bold small text-uppercase text-muted">Телефон</label>
-                                <input type="tel" class="form-control bg-light" id="phone" name="phone" placeholder="+7 (999) 000-00-00">
-                            </div>
-                            <div class="col-12">
-                                <label for="email" class="form-label fw-bold small text-uppercase text-muted">Email *</label>
-                                <input type="email" class="form-control bg-light" id="email" name="email" placeholder="name@example.com" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="message" class="form-label fw-bold small text-uppercase text-muted">Сообщение *</label>
-                                <textarea class="form-control bg-light" id="message" name="message" rows="4" placeholder="Ваш вопрос или пожелание..." required></textarea>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="form-check small text-muted">
-                                    <input class="form-check-input" type="checkbox" id="contact_agree" checked required>
-                                    <label class="form-check-label" for="contact_agree">
-                                        Нажимая кнопку, вы соглашаетесь на 
-                                        <a href="docs/personal_data_agreement.pdf" target="_blank" class="text-dark fw-bold text-decoration-underline">
-                                            обработку персональных данных
-                                        </a> в соответствии с 152-ФЗ
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mt-3">
-                                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold rounded-pill shadow-sm">
-                                    <i class="bi bi-send-fill me-1"></i> Отправить сообщение
-                                </button>
+                                <label class="form-label small fw-bold text-muted text-uppercase">Телефон для связи *</label>
+                                <input type="tel" name="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Email (необязательно)</label>
+                            <input type="email" name="email" class="form-control" placeholder="name@example.com">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Что вас интересует? *</label>
+                            <textarea name="message" class="form-control" rows="4" placeholder="Модель печи, расчет дымохода, выезд мастера, наличие на складе..." required></textarea>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" name="consent_pd" id="c_pd" required checked>
+                            <label class="form-check-label small text-muted" for="c_pd">
+                                Даю согласие на обработку персональных данных в соответствии с <a href="terms.php#privacy" target="_blank" class="text-dark fw-semibold">152-ФЗ</a> *
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-sm fs-5">
+                            Отправить вопрос инженеру <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
                     </form>
                 </div>
             </div>
+        </div>
 
-            <!-- Блок юридических реквизитов (Требование законодательства РФ) -->
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
-                    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold fs-6">
-                            <i class="bi bi-building-fill-check text-warning me-2"></i>Реквизиты организации (ООО «МП ТЕРРИТОРИЯ ТЕПЛА»)
-                        </h5>
-                        <span class="badge bg-warning text-dark">Официальные данные</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <table class="table table-sm table-borderless mb-0">
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-muted text-nowrap" style="width: 170px;">Полное наименование:</td>
-                                            <td class="fw-bold text-dark">ООО «МП ТЕРРИТОРИЯ ТЕПЛА»</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Генеральный директор:</td>
-                                            <td class="fw-bold text-dark">Папин Михаил Николаевич</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">ИНН:</td>
-                                            <td class="fw-bold text-dark">0411174476</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">КПП:</td>
-                                            <td class="fw-bold text-dark">041101001</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">ОГРН:</td>
-                                            <td class="fw-bold text-dark">1150411003808</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Юридический адрес:</td>
-                                            <td class="text-dark">649100 Республика Алтай, м.р-н Майминский, с.п. Майминское, с. Майма, ул. Ленина, д. 1/1, Офис 4</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Фактический адрес:</td>
-                                            <td class="text-dark">649100 Республика Алтай, м.р-н Майминский, с.п. Майминское, с. Майма, ул. Ленина, д. 1/1, Офис 4</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col-md-6 border-start-md">
-                                <table class="table table-sm table-borderless mb-0">
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-muted text-nowrap" style="width: 170px;">Банк:</td>
-                                            <td class="fw-bold text-dark">ОМСКОЕ ОТДЕЛЕНИЕ № 8634 ПАО СБЕРБАНК</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Расчетный счет:</td>
-                                            <td class="fw-bold text-dark font-monospace">40702810602350000763</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Корреспондентский счет:</td>
-                                            <td class="fw-bold text-dark font-monospace">30101810900000000673</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">БИК:</td>
-                                            <td class="fw-bold text-dark font-monospace">045209673</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Телефон:</td>
-                                            <td class="text-dark"><a href="tel:+79136914443" class="text-decoration-none text-dark fw-bold">+7 (913) 691-44-43</a>, 8-960-968-1000</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">Email:</td>
-                                            <td class="text-dark"><a href="mailto:mpterritoriatepla@yandex.ru" class="text-decoration-none text-dark">mpterritoriatepla@yandex.ru</a>, admin561245@territoriatepla.ru</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Карта склада -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="card-header py-3" style="background: var(--dark-main, #181c20); color: #fff;">
+                <h5 class="mb-0 fw-bold fs-6">
+                    <i class="bi bi-geo-alt text-warning me-2"></i> Схема проезда к магазину-складу (с. Майма, ул. Энергетиков, 24)
+                </h5>
             </div>
-
-            <!-- Карты магазинов: 2 точки -->
-            <div class="col-12">
-                <div class="row g-4">
-                    <!-- Карта 1: с. Майма -->
-                    <div class="col-lg-6">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
-                            <div class="card-header bg-dark text-white py-3">
-                                <h6 class="mb-0 fw-bold">
-                                    <i class="bi bi-geo-alt-fill text-warning me-2"></i>Магазин и склад в с. Майма
-                                </h6>
-                                <small class="text-white-50">ул. Ленина, 1/1 (1/2), Офис 4</small>
-                            </div>
-                            <div class="card-body p-0">
-                                <iframe src="https://yandex.ru/map-widget/v1/?ll=85.905756%2C52.004100&z=17&pt=85.905756%2C52.004100" width="100%" height="420" frameborder="0" loading="lazy" style="border:0; display:block;"></iframe>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Карта 2: г. Горно-Алтайск (ТЦ "Кристалл") -->
-                    <div class="col-lg-6">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
-                            <div class="card-header bg-dark text-white py-3">
-                                <h6 class="mb-0 fw-bold">
-                                    <i class="bi bi-geo-alt-fill text-warning me-2"></i>Магазин в г. Горно-Алтайск
-                                </h6>
-                                <small class="text-white-50">ул. Чорос-Гуркина, 9А (ТЦ «Кристалл»)</small>
-                            </div>
-                            <div class="card-body p-0">
-                                <iframe src="https://yandex.ru/map-widget/v1/?ll=85.967192%2C51.956689&z=17&pt=85.967192%2C51.956689" width="100%" height="420" frameborder="0" loading="lazy" style="border:0; display:block;"></iframe>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="card-body p-0">
+                <iframe src="https://yandex.ru/map-widget/v1/?ll=85.905756%2C52.004100&z=16&pt=85.905756%2C52.004100" width="100%" height="450" frameborder="0" loading="lazy" style="border:0; display:block;"></iframe>
             </div>
-
         </div>
     </div>
 </main>
