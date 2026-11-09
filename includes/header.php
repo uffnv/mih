@@ -14,7 +14,7 @@ if (isset($_SESSION['user_id'])) {
     $cart_count = count($cart_items);
 } else if (!empty($_SESSION['guest_cart'])) {
     foreach ($_SESSION['guest_cart'] as $qty) {
-        $cart_count += $qty;
+        $cart_count += (int)$qty;
     }
 }
 
@@ -32,6 +32,7 @@ if (isset($_SESSION['role'])) {
     }
 }
 $current_page = basename($_SERVER['PHP_SELF']);
+$css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . '/../css/style.css') : time();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -57,10 +58,27 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- GLightbox CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
 
-    <!-- Надежный инженерный стиль сайта (v3.0) -->
-    <link rel="stylesheet" href="css/style.css?v=3.0">
+    <!-- Надежный инженерный стиль (v3.2 с динамическим Cache-Busting) -->
+    <link rel="stylesheet" href="css/style.css?v=<?= $css_version; ?>">
+    
+    <!-- Critical CSS: железобетонная фиксация контраста шапки и ключевых стилей -->
     <style>
-        /* Принудительная фиксация темного фона шапки независимо от кеша браузера */
+        :root {
+            --bs-warning: #f59e0b;
+            --bs-warning-hover: #d97706;
+            --dark-main: #181c20;
+            --dark-surface: #222830;
+            --status-stock: #10b981;
+            --status-stock-bg: #ecfdf5;
+            --status-discount: #ef4444;
+            --border-color: #e2e8f0;
+            --bg-page: #f8fafc;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: #0f172a;
+        }
         .header-top-bar {
             background-color: #111417 !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -70,13 +88,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .main-header {
             background-color: #181c20 !important;
             border-bottom: 2px solid #f59e0b !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
         .navbar-brand .brand-title {
             color: #ffffff !important;
             font-weight: 800;
             letter-spacing: -0.02em;
-            font-size: 1.22rem;
+            font-size: 1.25rem;
             line-height: 1.1;
         }
         .navbar-brand .brand-sub {
@@ -87,27 +105,141 @@ $current_page = basename($_SERVER['PHP_SELF']);
             font-weight: 600;
         }
         .main-nav-link {
-            color: #e2e8f0 !important;
+            color: #f1f5f9 !important;
             font-weight: 500;
-            padding: 0.55rem 0.95rem !important;
+            font-size: 0.95rem;
+            padding: 0.55rem 0.9rem !important;
             transition: all 0.2s ease;
             border-radius: 6px;
         }
         .main-nav-link:hover {
             color: #f59e0b !important;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.06);
         }
         .main-nav-link.active-page {
             color: #ffffff !important;
             font-weight: 700;
-            background: rgba(245, 158, 11, 0.12);
+            background: rgba(245, 158, 11, 0.16);
+            border-bottom: 2px solid #f59e0b;
+        }
+        .hero-engineering {
+            background: linear-gradient(135deg, #121518 0%, #1a2027 50%, #242c35 100%) !important;
+            position: relative;
+            border-bottom: 3px solid #f59e0b;
+            overflow: hidden;
+        }
+        .feature-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
+            border-left: 3px solid #f59e0b;
+        }
+        .category-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
+            border-color: #f59e0b;
+        }
+        .category-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            background: #fffbeb;
+            color: #d97706;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            transition: all 0.2s ease;
+        }
+        .category-card:hover .category-icon {
+            background: #f59e0b;
+            color: #181c20;
+            transform: scale(1.08);
+        }
+        .product-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 28px -6px rgba(15, 23, 42, 0.12);
+            border-color: #cbd5e1;
+        }
+        .product-img-box {
+            position: relative;
+            height: 220px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow: hidden;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .product-img-box img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover .product-img-box img {
+            transform: scale(1.05);
+        }
+        .badge-stock {
+            background-color: var(--status-stock-bg);
+            color: var(--status-stock);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .badge-out-of-stock {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        .badge-discount {
+            background-color: var(--status-discount);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
 <!-- 1. ВЕРХНЯЯ ИНФОРМАЦИОННАЯ ПЛАШКА -->
-<div class="header-top-bar py-1">
+<div class="header-top-bar py-1" style="background-color: #111417 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; color: #cbd5e1 !important;">
     <div class="container d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
             <span><i class="bi bi-geo-alt-fill text-warning me-1"></i> с. Майма, ул. Энергетиков, д. 24</span>
@@ -122,14 +254,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
 </div>
 
 <!-- 2. ОСНОВНАЯ ШАПКА САЙТА -->
-<header class="sticky-top main-header">
-    <nav class="navbar navbar-expand-lg navbar-dark container py-2">
+<header class="sticky-top main-header" style="background-color: #181c20 !important; border-bottom: 2px solid #f59e0b !important;">
+    <nav class="navbar navbar-expand-lg navbar-dark container py-2" style="background-color: #181c20 !important;">
         <!-- Логотип -->
         <a class="navbar-brand text-uppercase d-flex align-items-center text-decoration-none" href="index.php">
             <img src="images/documents/logo.jpg" alt="Логотип" style="height: 44px; width: auto; object-fit: contain;" class="me-2 rounded shadow-sm" onerror="this.style.display='none'">
             <div>
-                <span class="brand-title d-block">ТЕРРИТОРИЯ ТЕПЛА</span>
-                <span class="brand-sub d-block">Отопительное оборудование</span>
+                <span class="brand-title d-block" style="color: #ffffff !important; font-weight: 800; font-size: 1.25rem;">ТЕРРИТОРИЯ ТЕПЛА</span>
+                <span class="brand-sub d-block" style="color: #f59e0b !important; font-size: 0.68rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;">Отопительное оборудование</span>
             </div>
         </a>
 
@@ -152,8 +284,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link main-nav-link <?= $current_page == 'installers.php' ? 'active-page' : '' ?>" href="installers.php">
+                    <a class="nav-link main-nav-link <?= ($current_page == 'installers.php' || $current_page == 'installer.php') ? 'active-page' : '' ?>" href="installers.php">
                         Монтажники
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main-nav-link <?= $current_page == 'videos.php' ? 'active-page' : '' ?>" href="videos.php">
+                        Видео
                     </a>
                 </li>
                 <li class="nav-item">

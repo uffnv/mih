@@ -87,6 +87,10 @@ a:hover {
     color: var(--bs-warning-hover);
 }
 
+.hover-white:hover {
+    color: #ffffff !important;
+}
+
 /* Кнопки */
 .btn {
     font-weight: 600;
@@ -120,7 +124,6 @@ a:hover {
     box-shadow: 0 4px 12px rgba(24, 28, 32, 0.3);
 }
 
-/* Шапка сайта */
 /* Шапка сайта — Жесткая фиксация контраста и фона */
 .header-top-bar {
     background-color: #111417 !important;
@@ -153,7 +156,8 @@ a:hover {
 }
 
 .nav-link,
-.navbar-dark .navbar-nav .nav-link {
+.navbar-dark .navbar-nav .nav-link,
+.main-nav-link {
     font-size: 0.95rem;
     font-weight: 500;
     color: #cbd5e1 !important;
@@ -163,17 +167,20 @@ a:hover {
     border-radius: 6px;
 }
 .nav-link:hover,
-.navbar-dark .navbar-nav .nav-link:hover {
+.navbar-dark .navbar-nav .nav-link:hover,
+.main-nav-link:hover {
     color: var(--bs-warning) !important;
     background: rgba(255, 255, 255, 0.04);
 }
 .nav-link.active-page,
-.navbar-dark .navbar-nav .nav-link.active-page {
+.navbar-dark .navbar-nav .nav-link.active-page,
+.main-nav-link.active-page {
     color: #ffffff !important;
     font-weight: 700;
-    background: rgba(245, 158, 11, 0.12);
+    background: rgba(245, 158, 11, 0.16) !important;
 }
-.nav-link.active-page::after {
+.nav-link.active-page::after,
+.main-nav-link.active-page::after {
     content: '';
     position: absolute;
     bottom: 2px;
@@ -198,7 +205,7 @@ a:hover {
     right: -10%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0) 70%);
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0) 70%);
     pointer-events: none;
 }
 .hero-engineering::after {
@@ -208,7 +215,7 @@ a:hover {
     left: 10%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(234, 88, 12, 0.08) 0%, rgba(234, 88, 12, 0) 70%);
+    background: radial-gradient(circle, rgba(234, 88, 12, 0.09) 0%, rgba(234, 88, 12, 0) 70%);
     pointer-events: none;
 }
 
@@ -225,7 +232,7 @@ a:hover {
 .feature-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-card);
-    border-color: #cbd5e1;
+    border-left: 3px solid var(--bs-warning);
 }
 .feature-icon-wrapper {
     width: 52px;
@@ -347,6 +354,97 @@ a:hover {
     transform: scale(1.08);
 }
 
+/* Карточки видеообзоров */
+.video-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+    transition: var(--transition-base);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.video-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--bs-warning);
+}
+.video-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    background: #000000;
+}
+.video-iframe-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Карточки монтажников */
+.installer-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-subtle);
+    transition: var(--transition-base);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.installer-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--bs-warning);
+}
+.installer-avatar {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    border: 3px solid var(--bs-warning);
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.installer-avatar-placeholder {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    border: 3px solid var(--bs-warning);
+    background: var(--dark-main);
+    color: var(--bs-warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+/* Карточки отзывов */
+.review-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+    transition: var(--transition-base);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.review-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
 /* Секция призыва к действию (CTA) */
 .cta-banner {
     background: linear-gradient(135deg, #181c20 0%, #252d36 100%);
@@ -374,6 +472,22 @@ a:hover {
 .spec-table td:last-child {
     font-weight: 600;
     color: #0f172a;
+}
+
+/* Карточки акций */
+.promo-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+    transition: var(--transition-base);
+    background: #ffffff;
+    height: 100%;
+}
+.promo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--bs-warning);
 }
 
 /* Подвал */
