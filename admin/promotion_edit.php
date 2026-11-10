@@ -28,6 +28,9 @@ if ($id) {
 
 // Обработка формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);
     $discount_percent = !empty($_POST['discount_percent']) ? (int)$_POST['discount_percent'] : null;
@@ -36,17 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     $sort_order = (int)$_POST['sort_order'];
 
-    // Загрузка фото
+    // Загрузка фото (Защищенная валидация)
     $image_path = $promo['image_path'];
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = '../images/promotions/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-        
-        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $filename = 'promo_' . time() . '_' . uniqid() . '.' . $ext;
-        
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
-            $image_path = '/images/promotions/' . $filename;
+        $up = safeUploadFile($_FILES['image'], '../images/promotions/', ['jpg', 'jpeg', 'png', 'webp'], 'promo_');
+        if ($up['success']) {
+            $image_path = '/images/promotions/' . $up['filename'];
+        } else {
+            $error = $up['error'];
         }
     }
 
@@ -89,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 
 <form method="post" enctype="multipart/form-data" class="row g-3">
+    <?= getCsrfField(); ?>
     
     <div class="col-md-8">
         <div class="card mb-4">

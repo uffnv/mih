@@ -4,13 +4,22 @@ $page_title = 'Управление заказами';
 require_once 'admin_header.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $order_id = (int)$_POST['order_id'];
-    $status = $_POST['status'];
-    $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
-    if ($stmt->execute([$status, $order_id])) {
-        $success = "Статус заказа #$order_id успешно изменен на «" . htmlspecialchars($status) . "»!";
+    $status = trim($_POST['status'] ?? '');
+    $allowed_statuses = ['pending', 'confirmed', 'processing', 'completed', 'cancelled'];
+    
+    if (!in_array($status, $allowed_statuses, true)) {
+        $error = "Недопустимый статус заказа.";
     } else {
-        $error = "Ошибка при обновлении статуса.";
+        $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+        if ($stmt->execute([$status, $order_id])) {
+            $success = "Статус заказа #$order_id успешно изменен на «" . htmlspecialchars($status) . "»!";
+        } else {
+            $error = "Ошибка при обновлении статуса.";
+        }
     }
 }
 
@@ -212,6 +221,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     
                                                     <hr>
                                                     <form method="POST" class="d-flex flex-wrap align-items-center gap-2">
+                                                        <?= getCsrfField(); ?>
                                                         <input type="hidden" name="action" value="update_status">
                                                         <input type="hidden" name="order_id" value="<?= $order['id']; ?>">
                                                         <label class="fw-bold text-dark small">Сменить статус:</label>

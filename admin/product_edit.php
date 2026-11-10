@@ -9,13 +9,20 @@ $images = [];
 
 // 1. Логика удаления изображения (с редиректом)
 if (isset($_GET['delete_image'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $imgId = (int)$_GET['delete_image'];
     $stmt = $pdo->prepare("SELECT image_path FROM product_images WHERE id = ?");
     $stmt->execute([$imgId]);
     $img = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($img && file_exists(__DIR__ . '/..' . $img['image_path'])) {
-        unlink(__DIR__ . '/..' . $img['image_path']);
+    if ($img && !empty($img['image_path'])) {
+        $realFile = realpath(__DIR__ . '/../' . ltrim($img['image_path'], '/'));
+        $allowedDir = realpath(__DIR__ . '/../images/products');
+        if ($realFile && $allowedDir && strpos($realFile, $allowedDir) === 0 && file_exists($realFile)) {
+            @unlink($realFile);
+        }
     }
     $pdo->prepare("DELETE FROM product_images WHERE id = ?")->execute([$imgId]);
     
@@ -26,6 +33,9 @@ if (isset($_GET['delete_image'])) {
 
 // 2. Обработка сохранения формы (с редиректом)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $data = [
         'name' => $_POST['name'],
         'category_id' => $_POST['category_id'],
@@ -57,10 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Загрузка изображений
+    // Загрузка изображений (Защищенная валидация)
     if (!empty($_FILES['images']['name'][0])) {
         foreach ($_FILES['images']['name'] as $key => $name) {
-            if ($_FILES['images']['error'][$key] === 0) {
+            if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
                 $file = [
                     'name' => $name,
                     'tmp_name' => $_FILES['images']['tmp_name'][$key],
@@ -69,13 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'size' => $_FILES['images']['size'][$key]
                 ];
                 
-                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-                $new_name = uniqid() . '.' . $ext;
-                $upload_dir = '../images/products/';
-                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
-                
-                if (move_uploaded_file($file['tmp_name'], $upload_dir . $new_name)) {
-                    $db_path = 'images/products/' . $new_name;
+                $uploadResult = safeUploadFile($file, '../images/products/', ['jpg', 'jpeg', 'png', 'webp', 'svg'], 'prod_');
+                if ($uploadResult['success']) {
+                    $db_path = 'images/products/' . $uploadResult['filename'];
                     $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
                     $stmt->execute([$id, $db_path]);
                 }
@@ -113,6 +119,7 @@ require_once 'admin_header.php';
 </div>
 
 <form method="POST" enctype="multipart/form-data">
+    <?= getCsrfField(); ?>
     <div class="row g-4">
         <!-- Левая колонка (Основное) -->
         <div class="col-lg-8">
@@ -153,7 +160,7 @@ require_once 'admin_header.php';
                                     <div class="card h-100 shadow-sm">
                                         <img src="../<?= htmlspecialchars($img['image_path']); ?>" class="card-img-top object-fit-cover" style="height: 100px;" alt="Product">
                                         <div class="card-footer p-1 text-center">
-                                            <a href="product_edit.php?id=<?= $id; ?>&delete_image=<?= $img['id']; ?>" class="text-danger small text-decoration-none" onclick="return confirm('Удалить фото?');">
+                                            <a href="product_edit.php?id=<?= $id; ?>&delete_image=<?= $img['id']; ?>&csrf_token=<?= generateCsrfToken(); ?>" class="text-danger small text-decoration-none" onclick="return confirm('Удалить фото?');">
                                                 <i class="bi bi-trash"></i> Удалить
                                             </a>
                                         </div>

@@ -1,20 +1,29 @@
 <?php
 require_once '../includes/config.php';
 
-// Одобрение / Удаление отзывов о товарах
+// Одобрение / Удаление отзывов о товарах (с защитой CSRF)
 if (isset($_GET['approve'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['approve'];
     $pdo->prepare("UPDATE product_reviews SET is_approved = 1 WHERE id = ?")->execute([$id]);
     header("Location: reviews.php?msg=approved");
     exit;
 }
 if (isset($_GET['reject'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['reject'];
     $pdo->prepare("UPDATE product_reviews SET is_approved = 0 WHERE id = ?")->execute([$id]);
     header("Location: reviews.php?msg=rejected");
     exit;
 }
 if (isset($_GET['delete'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['delete'];
     $pdo->prepare("DELETE FROM product_reviews WHERE id = ?")->execute([$id]);
     header("Location: reviews.php?msg=deleted");
@@ -103,15 +112,15 @@ $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </td>
                             <td class="text-end pe-3 text-nowrap">
                                 <?php if (!$r['is_approved']): ?>
-                                    <a href="reviews.php?approve=<?= $r['id'] ?>" class="btn btn-sm btn-success rounded-pill px-2 me-1" title="Одобрить">
+                                    <a href="reviews.php?approve=<?= $r['id'] ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-success rounded-pill px-2 me-1" title="Одобрить">
                                         <i class="bi bi-check-lg"></i>
                                     </a>
                                 <?php else: ?>
-                                    <a href="reviews.php?reject=<?= $r['id'] ?>" class="btn btn-sm btn-outline-warning rounded-pill px-2 me-1" title="Снять с публикации">
+                                    <a href="reviews.php?reject=<?= $r['id'] ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-outline-warning rounded-pill px-2 me-1" title="Снять с публикации">
                                         <i class="bi bi-dash-circle"></i>
                                     </a>
                                 <?php endif; ?>
-                                <a href="reviews.php?delete=<?= $r['id'] ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Удалить отзыв безвозвратно?');" title="Удалить">
+                                <a href="reviews.php?delete=<?= $r['id'] ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Удалить отзыв безвозвратно?');" title="Удалить">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </td>

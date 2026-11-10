@@ -2,15 +2,22 @@
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 
-// Удаление
+// Удаление (с защитой CSRF и Path Traversal)
 if (isset($_GET['delete'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("SELECT file_path FROM company_documents WHERE id = ?");
     $stmt->execute([$id]);
     $file = $stmt->fetchColumn();
     
-    if ($file && file_exists(__DIR__ . '/../' . ltrim($file, '/'))) {
-        unlink(__DIR__ . '/../' . ltrim($file, '/'));
+    if ($file) {
+        $realFile = realpath(__DIR__ . '/../' . ltrim($file, '/'));
+        $allowedDir = realpath(__DIR__ . '/../images/documents');
+        if ($realFile && $allowedDir && strpos($realFile, $allowedDir) === 0 && file_exists($realFile)) {
+            @unlink($realFile);
+        }
     }
     
     $pdo->prepare("DELETE FROM company_documents WHERE id = ?")->execute([$id]);
@@ -81,7 +88,7 @@ $docs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <a href="document_edit.php?id=<?= $doc['id']; ?>" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1" title="Редактировать">
                                     <i class="bi bi-pencil me-1"></i> Изменить
                                 </a>
-                                <a href="documents.php?delete=<?= $doc['id']; ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Удалить документ?');" title="Удалить">
+                                <a href="documents.php?delete=<?= $doc['id']; ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Удалить документ?');" title="Удалить">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </td>

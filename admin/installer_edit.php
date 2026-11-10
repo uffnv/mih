@@ -8,12 +8,19 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 // Обработка удаления фото из портфолио
 if (isset($_GET['delete_portfolio'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $pfId = (int)$_GET['delete_portfolio'];
     $stmt = $pdo->prepare("SELECT image_path FROM installer_portfolio WHERE id = ?");
     $stmt->execute([$pfId]);
     $pfImg = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($pfImg && file_exists(__DIR__ . '/..' . $pfImg['image_path'])) {
-        unlink(__DIR__ . '/..' . $pfImg['image_path']);
+    if ($pfImg && !empty($pfImg['image_path'])) {
+        $realFile = realpath(__DIR__ . '/..' . ltrim($pfImg['image_path'], '/'));
+        $allowedDir = realpath(__DIR__ . '/../images/installers/portfolio');
+        if ($realFile && $allowedDir && strpos($realFile, $allowedDir) === 0 && file_exists($realFile)) {
+            @unlink($realFile);
+        }
     }
     $pdo->prepare("DELETE FROM installer_portfolio WHERE id = ?")->execute([$pfId]);
     
@@ -24,6 +31,9 @@ if (isset($_GET['delete_portfolio'])) {
 
 // ОБРАБОТКА ПОСТ-ЗАПРОСА (Сохранение)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     // 1. Получение данных из формы
     $data = [
         'first_name' => $_POST['first_name'],
@@ -87,13 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!isset($error)) {
-        // 3. Аватар
+        // 3. Аватар (Защищенная валидация)
         if (!empty($_FILES['photo']['name'])) {
-            $uploadDir = '../images/installers/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-            $fileName = uniqid() . '_' . basename($_FILES['photo']['name']);
-            if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $fileName)) {
-                $data['photo_path'] = '/images/installers/' . $fileName;
+            $up = safeUploadFile($_FILES['photo'], '../images/installers/', ['jpg', 'jpeg', 'png', 'webp'], 'inst_');
+            if ($up['success']) {
+                $data['photo_path'] = '/images/installers/' . $up['filename'];
             }
         } elseif ($id) {
              // Если редактируем и фото не меняли, оставляем старое (в запросе UPDATE мы не должны перезатирать путь, если он не передан, 
@@ -127,16 +135,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $pdo->lastInsertId();
         }
 
-        // 5. Портфолио
+        // 5. Портфолио (Защищенная валидация)
         if (!empty($_FILES['portfolio']['name'][0])) {
-            $pfDir = '../images/installers/portfolio/';
-            if (!is_dir($pfDir)) mkdir($pfDir, 0777, true);
             foreach ($_FILES['portfolio']['name'] as $key => $name) {
-                if ($_FILES['portfolio']['error'][$key] === 0) {
-                    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-                    $new_name = 'work_' . uniqid() . '.' . $ext;
-                    if (move_uploaded_file($_FILES['portfolio']['tmp_name'][$key], $pfDir . $new_name)) {
-                        $dbPath = '/images/installers/portfolio/' . $new_name;
+                if ($_FILES['portfolio']['error'][$key] === UPLOAD_ERR_OK) {
+                    $itemFile = [
+                        'name' => $name,
+                        'tmp_name' => $_FILES['portfolio']['tmp_name'][$key],
+                        'type' => $_FILES['portfolio']['type'][$key],
+                        'error' => 0,
+                        'size' => $_FILES['portfolio']['size'][$key]
+                    ];
+                    $up = safeUploadFile($itemFile, '../images/installers/portfolio/', ['jpg', 'jpeg', 'png', 'webp'], 'work_');
+                    if ($up['success']) {
+                        $dbPath = '/images/installers/portfolio/' . $up['filename'];
                         $stmt = $pdo->prepare("INSERT INTO installer_portfolio (installer_id, image_path) VALUES (?, ?)");
                         $stmt->execute([$id, $dbPath]);
                     }
@@ -209,6 +221,7 @@ if ($id) {
 <?php endif; ?>
 
 <form method="post" enctype="multipart/form-data" class="row g-4">
+    <?= getCsrfField(); ?>
     <!-- Левая колонка -->
     <div class="col-md-8">
         <div class="card mb-4">
@@ -270,7 +283,7 @@ if ($id) {
                     <?php foreach ($portfolio as $img): ?>
                         <div class="col-6 col-md-3 position-relative">
                             <img src="<?= htmlspecialchars($img['image_path']) ?>" class="img-thumbnail w-100" style="height: 100px; object-fit: cover;">
-                            <a href="?id=<?= $id ?>&delete_portfolio=<?= $img['id'] ?>" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 px-1" onclick="return confirm('Удалить фото?')">&times;</a>
+                            <a href="?id=<?= $id ?>&delete_portfolio=<?= $img['id'] ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 px-1" onclick="return confirm('Удалить фото?')">&times;</a>
                         </div>
                     <?php endforeach; ?>
                 </div>

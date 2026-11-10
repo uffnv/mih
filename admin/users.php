@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once '../includes/config.php';
 $page_title = 'Управление пользователями';
 require_once 'admin_header.php';

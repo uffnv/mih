@@ -1,8 +1,11 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
 
-// Удаление отзыва
+// Удаление отзыва (с защитой CSRF)
 if (isset($_POST['delete_review']) && isset($_POST['review_id'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_POST['review_id'];
     $stmt = $pdo->prepare("DELETE FROM site_reviews WHERE id = ?");
     $stmt->execute([$id]);
@@ -75,6 +78,7 @@ $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td class="text-muted small text-nowrap"><?= date('d.m.Y H:i', strtotime($review['created_at'])) ?></td>
                                 <td class="text-end pe-3">
                                     <form method="POST" onsubmit="return confirm('Удалить этот отзыв?');" class="d-inline">
+                                        <?= getCsrfField(); ?>
                                         <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
                                         <button type="submit" name="delete_review" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Удалить">
                                             <i class="bi bi-trash"></i>

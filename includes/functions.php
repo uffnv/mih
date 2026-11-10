@@ -2277,4 +2277,105 @@ function getUserSiteReviews($userId) {
     $stmt->execute([$userId]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+/**
+ * =========================================================================
+ * МОДУЛЬ БЕЗОПАСНОСТИ: CSRF И ЗАЩИЩЕННАЯ ЗАГРУЗКА ФАЙЛОВ
+ * =========================================================================
+ */
+
+/**
+ * Генерация или получение текущего CSRF токена
+ */
+function generateCsrfToken() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Рендеринг скрытого input поля с CSRF токеном
+ */
+function getCsrfField() {
+    $token = generateCsrfToken();
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+}
+
+/**
+ * Проверка валидности CSRF токена
+ */
+function verifyCsrfToken($token = null) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if ($token === null) {
+        $token = $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? '';
+    }
+    if (empty($_SESSION['csrf_token']) || empty($token)) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], (string)$token);
+}
+
+/**
+ * Безопасная загрузка файлов с валидацией расширения и MIME-типа
+ * Защита от произвольной загрузки исполняемых файлов (RCE)
+ */
+function safeUploadFile($file, $targetDir, $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'svg'], $prefix = 'item_', $isImage = true) {
+    if (empty($file) || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+        return ['success' => false, 'error' => 'Ошибка загрузки файла или файл не выбран'];
+    }
+
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    
+    // 1. Строгая проверка расширения
+    if (!in_array($ext, $allowedExts, true)) {
+        return ['success' => false, 'error' => 'Недопустимый формат файла (разрешены: ' . implode(', ', $allowedExts) . ')'];
+    }
+
+    // 2. Блокировка опасных расширений в любом регистре
+    $dangerous = ['php', 'phtml', 'php3', 'php4', 'php5', 'php7', 'php8', 'phps', 'phar', 'inc', 'cgi', 'pl', 'sh', 'exe', 'bat'];
+    if (in_array($ext, $dangerous, true)) {
+        return ['success' => false, 'error' => 'Загрузка исполняемых файлов запрещена'];
+    }
+
+    // 3. Валидация содержимого изображения (если не SVG)
+    if ($isImage && $ext !== 'svg') {
+        $imgInfo = @getimagesize($file['tmp_name']);
+        if ($imgInfo === false) {
+            return ['success' => false, 'error' => 'Файл не является корректным изображением'];
+        }
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($imgInfo['mime'], $allowedMimes, true)) {
+            return ['success' => false, 'error' => 'Недопустимый MIME-тип изображения'];
+        }
+    }
+
+    // 4. Безопасное создание целевой директории
+    $targetDir = rtrim($targetDir, '/\\') . '/';
+    if (!is_dir($targetDir)) {
+        if (!mkdir($targetDir, 0755, true)) {
+            return ['success' => false, 'error' => 'Не удалось создать директорию для загрузки'];
+        }
+    }
+
+    // 5. Генерация уникального случайного имени
+    $newFilename = $prefix . bin2hex(random_bytes(8)) . '_' . time() . '.' . $ext;
+    $targetPath = $targetDir . $newFilename;
+
+    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+        @chmod($targetPath, 0644);
+        return [
+            'success' => true,
+            'filename' => $newFilename,
+            'fullpath' => $targetPath
+        ];
+    }
+
+    return ['success' => false, 'error' => 'Не удалось переместить загруженный файл'];
+}
 ?>

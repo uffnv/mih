@@ -13,6 +13,9 @@ if ($category) {
 
 // Обработка формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $name = trim($_POST['name']);
     $slug = trim($_POST['slug']) ?: strtolower(str_replace(' ', '-', $name)); // Простой авто-слаг
     
@@ -44,6 +47,7 @@ require_once 'admin_header.php';
 <div class="card">
     <div class="card-body">
         <form method="POST">
+            <?= getCsrfField(); ?>
             <div class="mb-3">
                 <label class="form-label">Название</label>
                 <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($category['name'] ?? ''); ?>" required>

@@ -15,41 +15,30 @@ if ($id) {
 
 // 2. Обрабатываем отправку формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $title = trim($_POST['title']);
     
     // Обработка файла
     if (!empty($_FILES['file']['name'])) {
-        // Если загружен новый файл
-        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'];
-        $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
-        
-        if (in_array($ext, $allowed)) {
-            $uploadDir = '../images/documents/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        $up = safeUploadFile($_FILES['file'], '../images/documents/', ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'], 'doc_', false);
+        if ($up['success']) {
+            $filePath = 'images/documents/' . $up['filename'];
             
-            $fileName = uniqid() . '.' . $ext;
-            $uploadFile = $uploadDir . $fileName;
-            
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadFile)) {
-                $filePath = 'images/documents/' . $fileName;
-                
-                if ($id) {
-                    // Обновление с файлом
-                    $stmt = $pdo->prepare("UPDATE company_documents SET title = ?, file_path = ? WHERE id = ?");
-                    $stmt->execute([$title, $filePath, $id]);
-                } else {
-                    // Добавление нового
-                    $stmt = $pdo->prepare("INSERT INTO company_documents (title, file_path) VALUES (?, ?)");
-                    $stmt->execute([$title, $filePath]);
-                }
-                // Редирект теперь сработает
-                header("Location: documents.php");
-                exit;
+            if ($id) {
+                // Обновление с файлом
+                $stmt = $pdo->prepare("UPDATE company_documents SET title = ?, file_path = ? WHERE id = ?");
+                $stmt->execute([$title, $filePath, $id]);
             } else {
-                $error = "Ошибка при сохранении файла.";
+                // Добавление нового
+                $stmt = $pdo->prepare("INSERT INTO company_documents (title, file_path) VALUES (?, ?)");
+                $stmt->execute([$title, $filePath]);
             }
+            header("Location: documents.php");
+            exit;
         } else {
-            $error = "Недопустимый формат файла.";
+            $error = $up['error'];
         }
     } elseif ($id) {
         // Обновление только названия (без файла)
@@ -82,6 +71,7 @@ require_once 'admin_header.php';
 <div class="card">
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
+            <?= getCsrfField(); ?>
             <div class="mb-3">
                 <label class="form-label">Название</label>
                 <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($doc['title'] ?? ''); ?>" required>

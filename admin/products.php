@@ -3,14 +3,20 @@ require_once '../includes/config.php';
 $page_title = 'Управление товарами';
 require_once 'admin_header.php';
 
-// Удаление / Восстановление
+// Удаление / Восстановление (с защитой CSRF)
 if (isset($_GET['delete'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['delete'];
     $pdo->prepare("UPDATE products SET is_active = 0 WHERE id = ?")->execute([$id]);
     header("Location: products.php?msg=deleted");
     exit;
 }
 if (isset($_GET['restore'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['restore'];
     $pdo->prepare("UPDATE products SET is_active = 1 WHERE id = ?")->execute([$id]);
     header("Location: products.php?msg=restored");
@@ -188,11 +194,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <i class="bi bi-pencil me-1"></i> Изменить
                                 </a>
                                 <?php if ($prod['is_active']): ?>
-                                    <a href="products.php?delete=<?= $prod['id']; ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Скрыть товар из каталога?');" title="Скрыть">
+                                    <a href="products.php?delete=<?= $prod['id']; ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Скрыть товар из каталога?');" title="Скрыть">
                                         <i class="bi bi-eye-slash"></i>
                                     </a>
                                 <?php else: ?>
-                                    <a href="products.php?restore=<?= $prod['id']; ?>" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Активировать">
+                                    <a href="products.php?restore=<?= $prod['id']; ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Активировать">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 <?php endif; ?>

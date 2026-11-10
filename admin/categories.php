@@ -1,8 +1,11 @@
 <?php
 require_once '../includes/config.php';
 
-// Удаление
+// Удаление (с защитой CSRF)
 if (isset($_GET['delete'])) {
+    if (!verifyCsrfToken($_GET['csrf_token'] ?? '')) {
+        die('Ошибка проверки CSRF токена');
+    }
     $id = (int)$_GET['delete'];
     // Проверяем, есть ли товары
     $check = $pdo->prepare("SELECT COUNT(*) FROM products WHERE category_id = ?");
@@ -84,7 +87,7 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <a href="category_edit.php?id=<?= $cat['id']; ?>" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1" title="Редактировать">
                                     <i class="bi bi-pencil me-1"></i> Изменить
                                 </a>
-                                <a href="categories.php?delete=<?= $cat['id']; ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Удалить категорию?');" title="Удалить">
+                                <a href="categories.php?delete=<?= $cat['id']; ?>&csrf_token=<?= generateCsrfToken(); ?>" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Удалить категорию?');" title="Удалить">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </td>
