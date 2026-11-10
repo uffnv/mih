@@ -1,9 +1,12 @@
-﻿<?php
+<?php
+require_once __DIR__ . '/admin_auth.php';
 require_once '../includes/config.php';
 
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM videos WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("DELETE FROM videos WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: videos.php?msg=deleted");
     exit;
 }
@@ -11,8 +14,13 @@ if (isset($_GET['delete'])) {
 $page_title = 'Управление видео';
 require_once 'admin_header.php';
 
-$stmt = $pdo->query("SELECT * FROM videos ORDER BY created_at DESC");
-$videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$videos = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM videos ORDER BY created_at DESC");
+    $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading videos: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

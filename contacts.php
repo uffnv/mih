@@ -42,7 +42,7 @@ include __DIR__ . '/includes/header.php';
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-geo-alt-fill me-1"></i> Точки продаж и склад в Республике Алтай
             </span>
-            <h1 class="display-5 fw-bold text-uppercase mb-2">Контакты и <span class="text-warning">магазины</span></h1>
+            <h1 class="display-5 fw-bold text-uppercase mb-2 text-white">Контакты и <span class="text-warning">магазины</span></h1>
             <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
                 Ответим на любые технические вопросы, рассчитаем систему отопления и поможем подобрать оборудование
             </p>

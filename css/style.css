@@ -78,6 +78,17 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.02em;
 }
 
+/* Высокий контраст заголовков в темных блоках и hero-баннерах */
+.text-white h1, .text-white h2, .text-white h3, .text-white h4, .text-white h5, .text-white h6,
+.hero-engineering h1, .hero-engineering h2, .hero-engineering h3,
+.hero-dark h1, .hero-dark h2,
+[class*="text-white"] h1, [class*="text-white"] h2,
+.bg-dark h1, .bg-dark h2, .bg-dark h3,
+[style*="linear-gradient"] h1, [style*="linear-gradient"] h2,
+[style*="background-color: #181c20"] h1, [style*="background-color: #181c20"] h2 {
+    color: #ffffff !important;
+}
+
 a {
     color: var(--text-main);
     text-decoration: none;
@@ -178,17 +189,7 @@ a:hover {
     color: #ffffff !important;
     font-weight: 700;
     background: rgba(245, 158, 11, 0.16) !important;
-}
-.nav-link.active-page::after,
-.main-nav-link.active-page::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 0.9rem;
-    right: 0.9rem;
-    height: 2px;
-    background-color: var(--bs-warning);
-    border-radius: 2px;
+    border-radius: 6px;
 }
 
 /* Главный баннер (Hero) */

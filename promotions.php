@@ -28,7 +28,7 @@ require_once __DIR__ . '/includes/header.php';
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-tag-fill me-1"></i> Выгодные покупки
             </span>
-            <h1 class="display-5 fw-bold text-uppercase mb-2">Акции и <span class="text-warning">Спецпредложения</span></h1>
+            <h1 class="display-5 fw-bold text-uppercase mb-2 text-white">Акции и <span class="text-warning">Спецпредложения</span></h1>
             <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
                 Сезонные скидки на печи, котлы, сэндвич-дымоходы и комплектующие для отопления
             </p>

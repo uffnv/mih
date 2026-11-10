@@ -1,4 +1,5 @@
-﻿<?php
+<?php
+require_once __DIR__ . '/admin_auth.php';
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 

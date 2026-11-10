@@ -1,5 +1,7 @@
 <?php
+require_once __DIR__ . '/admin_auth.php';
 require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 // Удаление отзыва (с защитой CSRF)
 if (isset($_POST['delete_review']) && isset($_POST['review_id'])) {
@@ -7,8 +9,10 @@ if (isset($_POST['delete_review']) && isset($_POST['review_id'])) {
         die('Ошибка проверки CSRF токена');
     }
     $id = (int)$_POST['review_id'];
-    $stmt = $pdo->prepare("DELETE FROM site_reviews WHERE id = ?");
-    $stmt->execute([$id]);
+    try {
+        $stmt = $pdo->prepare("DELETE FROM site_reviews WHERE id = ?");
+        $stmt->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: site_reviews.php?msg=deleted");
     exit;
 }
@@ -17,13 +21,18 @@ $page_title = 'Отзывы о магазине';
 require_once __DIR__ . '/admin_header.php';
 
 // Получение списка отзывов
-$stmt = $pdo->query("
-    SELECT r.*, u.username, u.first_name, u.last_name, u.email 
-    FROM site_reviews r 
-    LEFT JOIN users u ON r.user_id = u.id 
-    ORDER BY r.created_at DESC
-");
-$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$reviews = [];
+try {
+    $stmt = $pdo->query("
+        SELECT r.*, u.username, u.first_name, u.last_name, u.email 
+        FROM site_reviews r 
+        LEFT JOIN users u ON r.user_id = u.id 
+        ORDER BY r.created_at DESC
+    ");
+    $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading site_reviews: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

@@ -1,5 +1,15 @@
 <?php
+require_once __DIR__ . '/admin_auth.php';
 require_once '../includes/config.php';
+require_once '../includes/functions.php';
+
+// Проверяем / добавляем колонку is_approved, если ее нет в базе
+try {
+    $colCheck = $pdo->query("SHOW COLUMNS FROM product_reviews LIKE 'is_approved'");
+    if (!$colCheck || $colCheck->rowCount() === 0) {
+        $pdo->exec("ALTER TABLE product_reviews ADD COLUMN is_approved TINYINT(1) NOT NULL DEFAULT 1");
+    }
+} catch (Throwable $e) {}
 
 // Одобрение / Удаление отзывов о товарах (с защитой CSRF)
 if (isset($_GET['approve'])) {
@@ -7,7 +17,9 @@ if (isset($_GET['approve'])) {
         die('Ошибка проверки CSRF токена');
     }
     $id = (int)$_GET['approve'];
-    $pdo->prepare("UPDATE product_reviews SET is_approved = 1 WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("UPDATE product_reviews SET is_approved = 1 WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: reviews.php?msg=approved");
     exit;
 }
@@ -16,7 +28,9 @@ if (isset($_GET['reject'])) {
         die('Ошибка проверки CSRF токена');
     }
     $id = (int)$_GET['reject'];
-    $pdo->prepare("UPDATE product_reviews SET is_approved = 0 WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("UPDATE product_reviews SET is_approved = 0 WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: reviews.php?msg=rejected");
     exit;
 }
@@ -25,7 +39,9 @@ if (isset($_GET['delete'])) {
         die('Ошибка проверки CSRF токена');
     }
     $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM product_reviews WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("DELETE FROM product_reviews WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: reviews.php?msg=deleted");
     exit;
 }
@@ -34,21 +50,26 @@ $page_title = 'Отзывы о товарах';
 require_once 'admin_header.php';
 
 $filter = $_GET['filter'] ?? 'all';
-$sql = "
-    SELECT r.*, u.username as user_name, u.first_name, u.last_name, p.name as product_name 
-    FROM product_reviews r 
-    LEFT JOIN users u ON r.user_id = u.id 
-    LEFT JOIN products p ON r.product_id = p.id 
-";
-if ($filter === 'pending') {
-    $sql .= " WHERE r.is_approved = 0 ";
-} elseif ($filter === 'approved') {
-    $sql .= " WHERE r.is_approved = 1 ";
-}
-$sql .= " ORDER BY r.created_at DESC";
+$reviews = [];
+try {
+    $sql = "
+        SELECT r.*, u.username as user_name, u.first_name, u.last_name, p.name as product_name 
+        FROM product_reviews r 
+        LEFT JOIN users u ON r.user_id = u.id 
+        LEFT JOIN products p ON r.product_id = p.id 
+    ";
+    if ($filter === 'pending') {
+        $sql .= " WHERE r.is_approved = 0 ";
+    } elseif ($filter === 'approved') {
+        $sql .= " WHERE r.is_approved = 1 ";
+    }
+    $sql .= " ORDER BY r.created_at DESC";
 
-$stmt = $pdo->query($sql);
-$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->query($sql);
+    $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading product_reviews: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

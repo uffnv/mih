@@ -21,7 +21,7 @@ require_once __DIR__ . '/includes/header.php';
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-play-circle-fill me-1"></i> Практические обзоры
             </span>
-            <h1 class="display-5 fw-bold text-uppercase mb-2">Видеообзоры <span class="text-warning">оборудования</span></h1>
+            <h1 class="display-5 fw-bold text-uppercase mb-2 text-white">Видеообзоры <span class="text-warning">оборудования</span></h1>
             <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
                 Тестирование банных печей, твердотопливных котлов и правильный монтаж сэндвич-дымоходов от наших мастеров
             </p>

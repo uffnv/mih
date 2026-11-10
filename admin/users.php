@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once '../includes/config.php';
 $page_title = 'Управление пользователями';
 require_once 'admin_header.php';
@@ -9,12 +9,33 @@ $where = '';
 if ($filter_pdn === '1') $where = 'WHERE personal_data_agreed = 1';
 if ($filter_pdn === '0') $where = 'WHERE personal_data_agreed = 0';
 
-$stmt = $pdo->query("SELECT * FROM users $where ORDER BY created_at DESC");
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$users = [];
+$total = 0;
+$agreed = 0;
+$not_agreed = 0;
 
-$total = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-$agreed = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE personal_data_agreed = 1")->fetchColumn();
-$not_agreed = $total - $agreed;
+try {
+    $hasPdnCol = false;
+    $colCheck = $pdo->query("SHOW COLUMNS FROM users LIKE 'personal_data_agreed'");
+    if ($colCheck && $colCheck->rowCount() > 0) {
+        $hasPdnCol = true;
+    }
+
+    if (!$hasPdnCol) {
+        $where = '';
+    }
+
+    $stmt = $pdo->query("SELECT * FROM users $where ORDER BY created_at DESC");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $total = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    if ($hasPdnCol) {
+        $agreed = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE personal_data_agreed = 1")->fetchColumn();
+    }
+    $not_agreed = $total - $agreed;
+} catch (Throwable $e) {
+    error_log("Error loading users: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

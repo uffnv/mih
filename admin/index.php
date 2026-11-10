@@ -1,33 +1,84 @@
-﻿<?php
+<?php
 require_once '../includes/config.php';
 $page_title = 'Панель управления — Территория Тепла';
 require_once 'admin_header.php';
 
-// Статистика
-$stmt = $pdo->query("SELECT COUNT(*) FROM orders");
-$total_orders = (int)$stmt->fetchColumn();
+// Безопасный сбор статистики (с защитой от отсутствующих таблиц или колонок)
+$total_orders = 0;
+$total_revenue = 0.0;
+$total_products = 0;
+$pending_reviews = 0;
+$pending_installer_apps = 0;
+$users_count = 0;
+$unread_requests = 0;
+$recent_orders = [];
+$admin_db_notice = null;
 
-$stmt = $pdo->query("SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE status != 'cancelled'");
-$total_revenue = (float)$stmt->fetchColumn();
+try {
+    if (isset($pdo)) {
+        // 1. Заказы и выручка
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM orders");
+            $total_orders = (int)$stmt->fetchColumn();
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM products");
-$total_products = (int)$stmt->fetchColumn();
+            $stmt = $pdo->query("SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE status != 'cancelled'");
+            $total_revenue = (float)$stmt->fetchColumn();
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews WHERE is_approved = 0");
-$pending_reviews = (int)$stmt->fetchColumn();
+            $stmt = $pdo->query("SELECT * FROM orders ORDER BY created_at DESC LIMIT 6");
+            $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            error_log("Admin stats (orders) error: " . $e->getMessage());
+        }
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM installer_applications WHERE status = 'new'");
-$pending_installer_apps = (int)$stmt->fetchColumn();
+        // 2. Товары
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM products");
+            $total_products = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Admin stats (products) error: " . $e->getMessage());
+        }
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer' OR role = 'user'");
-$users_count = (int)$stmt->fetchColumn();
+        // 3. Отзывы (с автопроверкой колонки is_approved)
+        try {
+            $colCheck = $pdo->query("SHOW COLUMNS FROM product_reviews LIKE 'is_approved'");
+            if ($colCheck && $colCheck->rowCount() > 0) {
+                $stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews WHERE is_approved = 0");
+            } else {
+                $stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews");
+            }
+            $pending_reviews = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Admin stats (reviews) error: " . $e->getMessage());
+        }
 
-$stmt = $pdo->query("SELECT COUNT(*) FROM contact_requests WHERE status != 'processed'");
-$unread_requests = (int)$stmt->fetchColumn();
+        // 4. Заявки монтажников
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM installer_applications WHERE status = 'new'");
+            $pending_installer_apps = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Admin stats (installer_applications) error: " . $e->getMessage());
+        }
 
-// Последние заказы
-$stmt = $pdo->query("SELECT * FROM orders ORDER BY created_at DESC LIMIT 6");
-$recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // 5. Пользователи
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer' OR role = 'user'");
+            $users_count = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Admin stats (users) error: " . $e->getMessage());
+        }
+
+        // 6. Обращения с сайта
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM contact_requests WHERE status != 'processed'");
+            $unread_requests = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Admin stats (contact_requests) error: " . $e->getMessage());
+        }
+    }
+} catch (Throwable $e) {
+    $admin_db_notice = "Ошибка загрузки сводки: " . htmlspecialchars($e->getMessage());
+    error_log("Admin index fatal: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">
@@ -44,6 +95,12 @@ $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </a>
     </div>
 </div>
+
+<?php if (!empty($admin_db_notice)): ?>
+    <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= $admin_db_notice ?>
+    </div>
+<?php endif; ?>
 
 <!-- Карточки статистики -->
 <div class="row g-3 mb-4">

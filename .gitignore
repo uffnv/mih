@@ -11,6 +11,7 @@ includes/config.local.php
 !schema.sql
 !database_cleanup.sql
 !database_seed.sql
+!migrations/*.sql
 
 # Logs and cache
 *.log

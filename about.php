@@ -23,7 +23,7 @@ include __DIR__ . '/includes/header.php';
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-shield-check me-1"></i> Официальный производитель и поставщик
             </span>
-            <h1 class="display-5 fw-bold text-uppercase mb-2">О компании <span class="text-warning">«Территория Тепла»</span></h1>
+            <h1 class="display-5 fw-bold text-uppercase mb-2 text-white">О компании <span class="text-warning">«Территория Тепла»</span></h1>
             <p class="lead text-white-50 mb-0 max-w-600 mx-auto">
                 Производство, поставка и профессиональный монтаж отопительного оборудования в Республике Алтай с 1995 года
             </p>
@@ -167,16 +167,19 @@ include __DIR__ . '/includes/header.php';
             <?php endif; ?>
         </div>
 
-        <!-- Интерактивная карта расположения склада (как в оригинале) -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-            <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center" style="background: var(--dark-main, #181c20); color: #fff;">
-                <h5 class="mb-0 fw-bold fs-6 text-white">
-                    <i class="bi bi-geo-alt-fill text-warning me-2"></i> Расположение центрального магазина-склада в с. Майма
-                </h5>
-                <span class="badge bg-warning text-dark">ул. Ленина 1/1 / ул. Энергетиков 24</span>
-            </div>
-            <div class="card-body p-0">
-                <iframe src="https://yandex.ru/map-widget/v1/?ll=85.905756%2C52.004100&z=17&pt=85.905756%2C52.004100" width="100%" height="450" frameborder="0" loading="lazy" style="border:0; display:block;"></iframe>
+        <!-- Блок магазинов и складов со ссылкой на контакты (обе точки) -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #222830 100%); border-left: 4px solid #f59e0b;">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+                <div>
+                    <span class="badge bg-warning text-dark text-uppercase px-3 py-1 fw-bold mb-2">Наши магазины и склады</span>
+                    <h3 class="h4 fw-bold text-white mb-2">Две точки продаж и выдачи оборудования на Алтае</h3>
+                    <p class="text-white-50 mb-0">Магазин-склад в с. Майма (ул. Энергетиков, д. 24) и магазин в г. Горно-Алтайск (ТЦ «Кристалл», ул. Чорос-Гуркина, 9А).</p>
+                </div>
+                <div>
+                    <a href="contacts.php" class="btn btn-warning fw-bold px-4 py-2 rounded-pill shadow-sm text-nowrap">
+                        <i class="bi bi-geo-alt-fill me-1"></i> Все адреса и схемы проезда
+                    </a>
+                </div>
             </div>
         </div>
 

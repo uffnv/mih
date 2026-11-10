@@ -90,6 +90,12 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             border-bottom: 2px solid #f59e0b !important;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
+        /* Высокий контраст заголовков в темных блоках */
+        .text-white h1, .text-white h2, .text-white h3, .text-white h4,
+        .hero-engineering h1, .hero-engineering h2,
+        [style*="linear-gradient"] h1, [style*="linear-gradient"] h2 {
+            color: #ffffff !important;
+        }
         .navbar-brand .brand-title {
             color: #ffffff !important;
             font-weight: 800;
@@ -119,8 +125,12 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
         .main-nav-link.active-page {
             color: #ffffff !important;
             font-weight: 700;
-            background: rgba(245, 158, 11, 0.16);
-            border-bottom: 2px solid #f59e0b;
+            background: rgba(245, 158, 11, 0.16) !important;
+            border: none !important;
+            border-bottom: none !important;
+        }
+        .main-nav-link.active-page::after {
+            display: none !important;
         }
         .hero-engineering {
             background: linear-gradient(135deg, #121518 0%, #1a2027 50%, #242c35 100%) !important;
@@ -260,7 +270,7 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
         <a class="navbar-brand text-uppercase d-flex align-items-center text-decoration-none" href="index.php">
             <img src="images/documents/logo.jpg" alt="Логотип" style="height: 44px; width: auto; object-fit: contain;" class="me-2 rounded shadow-sm" onerror="this.style.display='none'">
             <div>
-                <span class="brand-title d-block" style="color: #ffffff !important; font-weight: 800; font-size: 1.25rem;">ТЕРРИТОРИЯ ТЕПЛА</span>
+                <span class="brand-title d-block" style="color: #ffffff !important; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em;">ТЕРРИТОРИЯ ТЕПЛА</span>
                 <span class="brand-sub d-block" style="color: #f59e0b !important; font-size: 0.68rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;">Отопительное оборудование</span>
             </div>
         </a>
@@ -312,14 +322,24 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
 
             <!-- Действия: Кабинет и Корзина -->
             <div class="d-flex align-items-center gap-2">
-                <a href="<?= htmlspecialchars($cabinet_link) ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold">
-                    <i class="bi bi-person-circle me-1 text-warning"></i> <?= htmlspecialchars($cabinet_title) ?>
-                </a>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                    <a href="admin/index.php" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35);">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Панель управления
+                    </a>
+                <?php elseif (isset($_SESSION['user_id'])): ?>
+                    <a href="<?= htmlspecialchars($cabinet_link) ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold">
+                        <i class="bi bi-person-circle me-1 text-warning"></i> <?= htmlspecialchars($cabinet_title) ?>
+                    </a>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-medium text-white-50 hover-white" style="border-color: rgba(255,255,255,0.18);">
+                        <i class="bi bi-person me-1 text-warning"></i> Войти
+                    </a>
+                <?php endif; ?>
 
-                <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold position-relative d-inline-flex align-items-center shadow-sm" style="background-color: #f59e0b; border-color: #f59e0b; color: #181c20;">
+                <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold position-relative d-inline-flex align-items-center shadow-sm" style="background-color: #f59e0b; border: none; color: #181c20;">
                     <i class="bi bi-cart3 fs-6 me-1"></i>
                     <span>Корзина</span>
-                    <span id="cart-count-badge" class="badge bg-dark text-warning rounded-pill ms-2" style="<?= $cart_count > 0 ? '' : 'display:none;' ?>">
+                    <span id="cart-count-badge" class="badge rounded-pill ms-2" style="background: #181c20; color: #f59e0b; font-size: 0.75rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
                         <?= (int)$cart_count ?>
                     </span>
                 </a>

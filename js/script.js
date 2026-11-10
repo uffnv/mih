@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Main JavaScript for "Михаил Потапыч" Store
  */
 document.addEventListener('DOMContentLoaded', function() {

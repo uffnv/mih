@@ -1,5 +1,7 @@
 <?php
+require_once __DIR__ . '/admin_auth.php';
 require_once '../includes/config.php';
+require_once '../includes/functions.php';
 
 // Удаление (с защитой CSRF)
 if (isset($_GET['delete'])) {
@@ -7,29 +9,38 @@ if (isset($_GET['delete'])) {
         die('Ошибка проверки CSRF токена');
     }
     $id = (int)$_GET['delete'];
-    // Проверяем, есть ли товары
-    $check = $pdo->prepare("SELECT COUNT(*) FROM products WHERE category_id = ?");
-    $check->execute([$id]);
-    if ($check->fetchColumn() > 0) {
-        $error = "Нельзя удалить категорию, в которой есть привязанные товары.";
-    } else {
-        $pdo->prepare("DELETE FROM categories WHERE id = ?")->execute([$id]);
-        header("Location: categories.php?msg=deleted");
-        exit;
+    try {
+        // Проверяем, есть ли товары
+        $check = $pdo->prepare("SELECT COUNT(*) FROM products WHERE category_id = ?");
+        $check->execute([$id]);
+        if ($check->fetchColumn() > 0) {
+            $error = "Нельзя удалить категорию, в которой есть привязанные товары.";
+        } else {
+            $pdo->prepare("DELETE FROM categories WHERE id = ?")->execute([$id]);
+            header("Location: categories.php?msg=deleted");
+            exit;
+        }
+    } catch (Throwable $e) {
+        $error = "Ошибка удаления: " . $e->getMessage();
     }
 }
 
 $page_title = 'Категории товаров';
 require_once 'admin_header.php';
 
-$stmt = $pdo->query("
-    SELECT c.*, COUNT(p.id) as products_count 
-    FROM categories c 
-    LEFT JOIN products p ON p.category_id = c.id 
-    GROUP BY c.id 
-    ORDER BY c.name ASC
-");
-$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$categories = [];
+try {
+    $stmt = $pdo->query("
+        SELECT c.*, COUNT(p.id) as products_count 
+        FROM categories c 
+        LEFT JOIN products p ON p.category_id = c.id 
+        GROUP BY c.id 
+        ORDER BY c.name ASC
+    ");
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading categories: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // includes/logout.php
 
 // Инициализируем сессию, если она еще не стартовала
@@ -23,6 +23,11 @@ session_destroy();
 
 // 4. Редирект на главную страницу (или на auth.php)
 // Используем абсолютный путь от корня сайта или относительный
-header("Location: ../index.php"); 
+if (!headers_sent()) {
+    header("Location: ../index.php"); 
+} else {
+    echo '<script>window.location.href="../index.php";</script>';
+    echo '<meta http-equiv="refresh" content="0;url=../index.php">';
+}
 exit;
 ?>

@@ -1,7 +1,7 @@
 <?php
+require_once __DIR__ . '/admin_auth.php';
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/admin_header.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $promo = [
@@ -73,6 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Ошибка сохранения: " . $e->getMessage();
     }
 }
+
+$page_title = $id ? 'Редактирование акции' : 'Новая акция';
+require_once __DIR__ . '/admin_header.php';
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">

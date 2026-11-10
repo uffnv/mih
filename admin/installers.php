@@ -1,15 +1,20 @@
-﻿<?php
+<?php
+require_once __DIR__ . '/admin_auth.php';
 require_once '../includes/config.php';
 
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $pdo->prepare("UPDATE installers SET is_active = 0 WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("UPDATE installers SET is_active = 0 WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: installers.php?msg=deleted");
     exit;
 }
 if (isset($_GET['restore'])) {
     $id = (int)$_GET['restore'];
-    $pdo->prepare("UPDATE installers SET is_active = 1 WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("UPDATE installers SET is_active = 1 WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: installers.php?msg=restored");
     exit;
 }
@@ -17,8 +22,13 @@ if (isset($_GET['restore'])) {
 $page_title = 'Управление мастерами';
 require_once 'admin_header.php';
 
-$stmt = $pdo->query("SELECT * FROM installers ORDER BY id DESC");
-$installers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$installers = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM installers ORDER BY id DESC");
+    $installers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading installers: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

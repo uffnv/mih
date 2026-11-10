@@ -1,9 +1,12 @@
-﻿<?php
+<?php
+require_once __DIR__ . '/admin_auth.php';
 require_once '../includes/config.php';
 
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM installer_reviews WHERE id = ?")->execute([$id]);
+    try {
+        $pdo->prepare("DELETE FROM installer_reviews WHERE id = ?")->execute([$id]);
+    } catch (Throwable $e) {}
     header("Location: installer_reviews.php?msg=deleted");
     exit;
 }
@@ -11,14 +14,19 @@ if (isset($_GET['delete'])) {
 $page_title = 'Отзывы о мастерах';
 require_once 'admin_header.php';
 
-$stmt = $pdo->query("
-    SELECT ir.*, u.username as user_name, u.first_name, u.last_name, i.first_name as installer_name, i.last_name as installer_surname
-    FROM installer_reviews ir
-    LEFT JOIN users u ON ir.user_id = u.id
-    LEFT JOIN installers i ON ir.installer_id = i.id
-    ORDER BY ir.created_at DESC
-");
-$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$reviews = [];
+try {
+    $stmt = $pdo->query("
+        SELECT ir.*, u.username as user_name, u.first_name, u.last_name, i.first_name as installer_name, i.last_name as installer_surname
+        FROM installer_reviews ir
+        LEFT JOIN users u ON ir.user_id = u.id
+        LEFT JOIN installers i ON ir.installer_id = i.id
+        ORDER BY ir.created_at DESC
+    ");
+    $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading installer_reviews: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

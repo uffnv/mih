@@ -24,7 +24,10 @@ if (isset($_GET['restore'])) {
 }
 
 // Категории для фильтра
-$categories = $pdo->query("SELECT id, name FROM categories ORDER BY sort_order ASC, name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$categories = [];
+try {
+    $categories = $pdo->query("SELECT id, name FROM categories ORDER BY sort_order ASC, name ASC")->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {}
 
 // Фильтры
 $search = trim($_GET['search'] ?? '');
@@ -65,9 +68,14 @@ if ($stock_filter === 'in_stock') {
 
 $sql .= " ORDER BY p.id DESC";
 
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$products = [];
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log("Error loading products in admin: " . $e->getMessage());
+}
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-4 border-bottom">

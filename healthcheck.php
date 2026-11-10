@@ -9,8 +9,34 @@ $status = [
     'mbstring' => extension_loaded('mbstring'),
     'config_local_exists' => file_exists(__DIR__ . '/includes/config.local.php'),
     'db_connected' => false,
-    'db_error' => null
+    'db_error' => null,
+    'dirs_status' => []
 ];
+
+// Проверка каталогов загрузки и прав доступа под Jino JH04 / CloudLinux LVE
+$checkDirs = [
+    'images/products' => 'Каталог фото товаров',
+    'images/categories' => 'Каталог фото категорий',
+    'images/installers' => 'Каталог фото монтажников',
+    'images/documents' => 'Каталог документов/сертификатов',
+    'videos' => 'Каталог видеообзоров'
+];
+
+foreach ($checkDirs as $dirRel => $dirLabel) {
+    $dirFull = __DIR__ . '/' . $dirRel;
+    if (!is_dir($dirFull)) {
+        @mkdir($dirFull, 0775, true);
+    }
+    $exists = is_dir($dirFull);
+    $writable = $exists && is_writable($dirFull);
+    $perms = $exists ? substr(sprintf('%o', fileperms($dirFull)), -4) : 'none';
+    $status['dirs_status'][$dirRel] = [
+        'label' => $dirLabel,
+        'exists' => $exists,
+        'writable' => $writable,
+        'perms' => $perms
+    ];
+}
 
 try {
     require_once __DIR__ . '/includes/config.php';
@@ -58,8 +84,19 @@ try {
                 <li>Таблица products в БД: <span class="<?= $status['products_table_exists'] ? 'ok' : 'err' ?>"><?= $status['products_table_exists'] ? 'Найдена [OK]' : 'НЕ НАЙДЕНА (импортируйте schema.sql)' ?></span></li>
             <?php endif; ?>
             <?php if (!empty($status['db_error'])): ?>
-                <li class="err">Текст ошибки: <?= htmlspecialchars($status['db_error']) ?></li>
+                <li class="err">Текст ошибки БД: <?= htmlspecialchars($status['db_error']) ?></li>
             <?php endif; ?>
+        </ul>
+
+        <h3 style="color: #479eb2; margin-top: 1.5rem; margin-bottom: 0.5rem;">Права каталогов загрузки (CloudLinux LVE / JH04)</h3>
+        <ul>
+            <?php foreach ($status['dirs_status'] as $dir => $dInfo): ?>
+                <li>
+                    <?= htmlspecialchars($dInfo['label']) ?> (<code><?= htmlspecialchars($dir) ?></code>):<br>
+                    Права: <code><?= htmlspecialchars($dInfo['perms']) ?></code> | 
+                    Запись PHP: <span class="<?= $dInfo['writable'] ? 'ok' : 'err' ?>"><?= $dInfo['writable'] ? 'РАЗРЕШЕНА [OK]' : 'ЗАПРЕЩЕНА [ERR]' ?></span>
+                </li>
+            <?php endforeach; ?>
         </ul>
         <div class="note">После проверки удалите этот файл (healthcheck.php) в целях безопасности.</div>
     </div>

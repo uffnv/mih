@@ -1,40 +1,48 @@
-﻿<?php
+<?php
 // admin/admin_header.php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Проверка прав администратора
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'moderator')) {
-    header('Location: ../login.php');
-    exit;
-}
+require_once __DIR__ . '/admin_auth.php';
 
 if (!isset($pdo)) {
     require_once __DIR__ . '/../includes/config.php';
 }
+require_once __DIR__ . '/../includes/functions.php';
 
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Получаем счетчики для бейджей
+// Получаем счетчики для бейджей (безопасно)
 $pending_orders_count = 0;
 $pending_reviews_count = 0;
 $pending_apps_count = 0;
 $new_requests_count = 0;
 
 try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'");
-    $pending_orders_count = (int)$stmt->fetchColumn();
+    if (isset($pdo)) {
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'");
+            $pending_orders_count = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {}
 
-    $stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews WHERE is_approved = 0");
-    $pending_reviews_count = (int)$stmt->fetchColumn();
+        try {
+            $colCheck = $pdo->query("SHOW COLUMNS FROM product_reviews LIKE 'is_approved'");
+            if ($colCheck && $colCheck->rowCount() > 0) {
+                $stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews WHERE is_approved = 0");
+            } else {
+                $stmt = $pdo->query("SELECT COUNT(*) FROM product_reviews");
+            }
+            $pending_reviews_count = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {}
 
-    $stmt = $pdo->query("SELECT COUNT(*) FROM installer_applications WHERE status = 'new'");
-    $pending_apps_count = (int)$stmt->fetchColumn();
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM installer_applications WHERE status = 'new'");
+            $pending_apps_count = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {}
 
-    $stmt = $pdo->query("SELECT COUNT(*) FROM contact_requests WHERE status != 'processed'");
-    $new_requests_count = (int)$stmt->fetchColumn();
-} catch (Exception $e) {}
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM contact_requests WHERE status != 'processed'");
+            $new_requests_count = (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {}
+    }
+} catch (Throwable $e) {}
 ?>
 <!DOCTYPE html>
 <html lang="ru">

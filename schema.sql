@@ -1,4 +1,4 @@
-﻿-- MariaDB dump 10.19  Distrib 10.8.4-MariaDB, for Win64 (AMD64)
+-- MariaDB dump 10.19  Distrib 10.8.4-MariaDB, for Win64 (AMD64)
 --
 -- Host: localhost    Database: heating_equipment_store
 -- ------------------------------------------------------
