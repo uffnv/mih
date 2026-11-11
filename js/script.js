@@ -206,9 +206,27 @@ function initAuthFormValidation() {
         return group ? group.querySelector('.field-error-text') : null;
     }
 
+    function isLoginForm(input) {
+        const form = input.closest('form');
+        return !!(form && form.dataset.authForm === 'login');
+    }
+
+    function clearFieldState(input) {
+        input.classList.remove('is-valid', 'is-invalid');
+        const errEl = getErrorContainer(input);
+        if (errEl) {
+            errEl.textContent = '';
+            errEl.classList.remove('show');
+        }
+    }
+
     function setFieldState(input, isValid, message) {
         const errEl = getErrorContainer(input);
         if (isValid) {
+            if (isLoginForm(input)) {
+                clearFieldState(input);
+                return;
+            }
             input.classList.remove('is-invalid');
             input.classList.add('is-valid');
             if (errEl) {
@@ -225,26 +243,22 @@ function initAuthFormValidation() {
         }
     }
 
-    function clearFieldState(input) {
-        input.classList.remove('is-valid', 'is-invalid');
-        const errEl = getErrorContainer(input);
-        if (errEl) {
-            errEl.textContent = '';
-            errEl.classList.remove('show');
-        }
-    }
-
     function sanitizeAndValidate(input, showEmptyError) {
         const rule = input.dataset.rule;
         let val = input.value;
 
         if (rule === 'human-name') {
+            const hadBad = /[^А-Яа-яЁёA-Za-z\s-]/.test(val);
             const filtered = val.replace(/[^А-Яа-яЁёA-Za-z\s-]/g, '').replace(/\s{2,}/g, ' ').replace(/^[\s-]+/, '');
             if (filtered !== val) {
                 input.value = filtered;
                 val = filtered;
             }
             const trimmed = val.trim();
+            if (hadBad && !showEmptyError) {
+                setFieldState(input, false, 'Разрешены только буквы, пробел и дефис (без цифр и спецсимволов).');
+                return false;
+            }
             if (!trimmed && !showEmptyError) {
                 clearFieldState(input);
                 return false;
@@ -255,25 +269,44 @@ function initAuthFormValidation() {
         }
 
         if (rule === 'login-id') {
+            const hadBad = /[^A-Za-z0-9@._+-]/.test(val);
             const filtered = val.replace(/[^A-Za-z0-9@._+-]/g, '');
             if (filtered !== val) {
                 input.value = filtered;
                 val = filtered;
             }
-            if (!val && !showEmptyError) {
-                clearFieldState(input);
+            if (hadBad && !showEmptyError) {
+                setFieldState(input, false, 'Удалены недопустимые символы (кириллица или пробелы). Допустимы: латиница, цифры, @ . _ + -');
                 return false;
             }
-            const ok = val.length >= 3 && val.length <= 100 && /^[A-Za-z0-9@._+-]{3,100}$/.test(val);
-            setFieldState(input, ok, 'Допустимы только латиница, цифры и @ . _ + - (от 3 символов).');
-            return ok;
+            if (!showEmptyError) {
+                clearFieldState(input);
+                return val.length >= 3;
+            }
+            if (!val) {
+                setFieldState(input, false, 'Введите Email или логин.');
+                return false;
+            }
+            if (val.includes('@')) {
+                const okEmail = val.length <= 100 && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(val);
+                setFieldState(input, okEmail, 'Некорректный формат Email (пример: name@example.ru).');
+                return okEmail;
+            }
+            const okLogin = val.length >= 3 && val.length <= 100 && /^[A-Za-z0-9._+-]{3,100}$/.test(val);
+            setFieldState(input, okLogin, 'Логин должен содержать минимум 3 символа (латиница, цифры, . _ + -).');
+            return okLogin;
         }
 
         if (rule === 'email') {
+            const hadBad = /[^A-Za-z0-9@._%+-]/.test(val);
             const filtered = val.replace(/[^A-Za-z0-9@._%+-]/g, '').toLowerCase();
             if (filtered !== val) {
                 input.value = filtered;
                 val = filtered;
+            }
+            if (hadBad && !showEmptyError) {
+                setFieldState(input, false, 'Email должен вводиться латиницей и без пробелов.');
+                return false;
             }
             if (!val && !showEmptyError) {
                 clearFieldState(input);
@@ -360,14 +393,19 @@ function initAuthFormValidation() {
         }
 
         if (rule === 'password-login') {
+            const hadSpace = /\s/.test(val);
             const filtered = val.replace(/\s+/g, '');
             if (filtered !== val) {
                 input.value = filtered;
                 val = filtered;
             }
-            if (!val && !showEmptyError) {
-                clearFieldState(input);
+            if (hadSpace && !showEmptyError) {
+                setFieldState(input, false, 'Пробелы в пароле не допускаются.');
                 return false;
+            }
+            if (!showEmptyError) {
+                clearFieldState(input);
+                return val.length >= 1;
             }
             const ok = val.length >= 1;
             setFieldState(input, ok, 'Введите пароль.');

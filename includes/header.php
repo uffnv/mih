@@ -99,27 +99,45 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
         [style*="linear-gradient"] h1, [style*="linear-gradient"] h2 {
             color: #ffffff !important;
         }
+        .navbar-brand {
+            min-width: 0;
+            max-width: 100%;
+        }
+        .navbar-brand .brand-text {
+            min-width: 0;
+        }
         .navbar-brand .brand-title {
             color: #ffffff !important;
             font-weight: 800;
             letter-spacing: -0.02em;
-            font-size: 1.25rem;
+            font-size: clamp(0.88rem, 2.2vw, 1.25rem);
             line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .navbar-brand .brand-sub {
             color: #FFDF1E !important;
-            font-size: 0.68rem;
-            letter-spacing: 1.2px;
+            font-size: clamp(0.56rem, 1.3vw, 0.68rem);
+            letter-spacing: 1.1px;
             text-transform: uppercase;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .main-nav-link {
             color: #f1f5f9 !important;
             font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.55rem 0.9rem !important;
+            font-size: 0.94rem;
+            padding: 0.5rem 0.78rem !important;
             transition: all 0.2s ease;
             border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .main-nav-link:hover {
             color: #FFDF1E !important;
@@ -269,19 +287,19 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
 
 <!-- 2. ОСНОВНАЯ ШАПКА САЙТА -->
 <header class="sticky-top main-header" style="background-color: #111417 !important; border-bottom: 2px solid #FFDF1E !important;">
-    <nav class="navbar navbar-expand-lg navbar-dark container py-2" style="background-color: #111417 !important;">
+    <nav class="navbar navbar-expand-xl navbar-dark container py-2" style="background-color: #111417 !important;">
         <!-- Логотип -->
-        <a class="navbar-brand text-uppercase d-flex align-items-center text-decoration-none me-auto" href="index.php">
-            <img src="images/documents/logo.jpg" alt="Логотип" style="height: 44px; width: auto; object-fit: contain;" class="me-2 rounded shadow-sm" onerror="this.style.display='none'">
-            <div>
-                <span class="brand-title d-block" style="color: #ffffff !important; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em;">ТЕРРИТОРИЯ ТЕПЛА</span>
-                <span class="brand-sub d-block" style="color: #FFDF1E !important; font-size: 0.68rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;">Отопительное оборудование</span>
+        <a class="navbar-brand text-uppercase d-flex align-items-center text-decoration-none me-auto flex-shrink-0" href="index.php">
+            <img src="images/documents/logo.jpg" alt="Логотип" style="height: 42px; width: auto; object-fit: contain;" class="me-2 rounded shadow-sm flex-shrink-0" onerror="this.style.display='none'">
+            <div class="brand-text">
+                <span class="brand-title d-block">ТЕРРИТОРИЯ ТЕПЛА</span>
+                <span class="brand-sub d-block">Отопительное оборудование</span>
             </div>
         </a>
 
         <!-- Мобильные быстрые действия (Корзина в 1 тап + Гамбургер) -->
-        <div class="d-flex d-lg-none align-items-center gap-2">
-            <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-2 px-sm-3 fw-bold position-relative d-inline-flex align-items-center shadow-sm" style="background-color: #FFDF1E; border: none; color: #111417; min-height: 38px;" aria-label="Корзина">
+        <div class="d-flex d-xl-none align-items-center gap-2 flex-shrink-0 ms-2">
+            <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-2 px-sm-3 fw-bold position-relative d-inline-flex align-items-center text-nowrap shadow-sm" style="background-color: #FFDF1E; border: none; color: #111417; min-height: 38px;" aria-label="Корзина">
                 <i class="bi bi-cart3 fs-6"></i>
                 <span class="badge rounded-pill ms-1 cart-count-sync" style="background: #111417; color: #FFDF1E; font-size: 0.72rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
                     <?= (int)$cart_count ?>
@@ -294,7 +312,7 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
 
         <!-- Навигация -->
         <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav mx-auto mb-2 mb-xl-0">
                 <li class="nav-item">
                     <a class="nav-link main-nav-link <?= $current_page == 'catalog.php' ? 'active-page' : '' ?>" href="catalog.php">
                         <i class="bi bi-grid-fill text-warning me-1"></i> Каталог
@@ -333,22 +351,22 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             </ul>
 
             <!-- Действия: Кабинет и Корзина -->
-            <div class="d-flex align-items-center gap-2 header-actions-collapse">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0 header-actions-collapse">
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="admin/index.php" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning" style="background: rgba(255, 223, 30, 0.12); border: 1px solid rgba(255, 223, 30, 0.4);">
-                        <i class="bi bi-shield-lock-fill me-1"></i> Панель управления
+                    <a href="admin/index.php" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning d-inline-flex align-items-center text-nowrap flex-shrink-0" style="background: rgba(255, 223, 30, 0.12); border: 1px solid rgba(255, 223, 30, 0.4);">
+                        <i class="bi bi-shield-lock-fill me-1"></i><span>Панель управления</span>
                     </a>
                 <?php elseif (isset($_SESSION['user_id'])): ?>
-                    <a href="<?= htmlspecialchars($cabinet_link) ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-person-circle me-1 text-warning"></i> <?= htmlspecialchars($cabinet_title) ?>
+                    <a href="<?= htmlspecialchars($cabinet_link) ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center text-nowrap flex-shrink-0">
+                        <i class="bi bi-person-circle me-1 text-warning"></i><span><?= htmlspecialchars($cabinet_title) ?></span>
                     </a>
                 <?php else: ?>
-                    <a href="login.php" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-medium text-white hover-white" style="border-color: rgba(255,255,255,0.22);">
-                        <i class="bi bi-person me-1 text-warning"></i> Войти
+                    <a href="login.php" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-medium text-white hover-white d-inline-flex align-items-center text-nowrap flex-shrink-0" style="border-color: rgba(255,255,255,0.22);">
+                        <i class="bi bi-person me-1 text-warning"></i><span>Войти</span>
                     </a>
                 <?php endif; ?>
 
-                <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold position-relative d-none d-lg-inline-flex align-items-center shadow-sm" style="background-color: #FFDF1E; border: none; color: #111417;">
+                <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold position-relative d-none d-xl-inline-flex align-items-center text-nowrap flex-shrink-0 shadow-sm" style="background-color: #FFDF1E; border: none; color: #111417;">
                     <i class="bi bi-cart3 fs-6 me-1"></i>
                     <span>Корзина</span>
                     <span id="cart-count-badge" class="badge rounded-pill ms-2 cart-count-sync" style="background: #111417; color: #FFDF1E; font-size: 0.75rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">

@@ -153,7 +153,7 @@ require_once __DIR__ . '/includes/header.php';
                                            required
                                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                                 </div>
-                                <span class="form-hint">Латинские буквы, цифры и символы @ . _ - (без пробелов)</span>
+                                <span class="form-hint">Введите Email (name@example.ru) или логин латиницей без пробелов</span>
                                 <div class="field-error-text"></div>
                             </div>
 
