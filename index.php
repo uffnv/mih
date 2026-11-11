@@ -390,7 +390,7 @@ require_once __DIR__ . '/includes/header.php';
                                         <div class="ratio ratio-16x9">
                                             <iframe src="<?= htmlspecialchars($vUrl) ?>" title="<?= htmlspecialchars($video['title']) ?>" allowfullscreen loading="lazy"></iframe>
                                         </div>
-                                        <div class="card-body text-white p-4 text-center" style="background: #181c20; border-top: 3px solid #f59e0b;">
+                                        <div class="card-body text-white p-4 text-center" style="background: #111417; border-top: 3px solid #FFDF1E;">
                                             <h4 class="card-title fw-bold mb-2 text-warning"><?= htmlspecialchars($video['title']) ?></h4>
                                             <?php if (!empty($video['description'])): ?>
                                                 <p class="card-text text-white-50 mb-0"><?= htmlspecialchars($video['description']) ?></p>
@@ -423,7 +423,7 @@ require_once __DIR__ . '/includes/header.php';
             <div class="text-center mb-5">
                 <span class="badge bg-warning text-dark text-uppercase px-3 py-1 fw-bold mb-2">Стандарты надежности</span>
                 <h2 class="h3 fw-bold text-dark mb-2">Почему выбирают «Территорию Тепла»</h2>
-                <div class="mx-auto" style="width: 60px; height: 3px; background: #f59e0b;"></div>
+                <div class="mx-auto" style="width: 60px; height: 3px; background: #FFDF1E;"></div>
             </div>
 
             <div class="row g-4">
@@ -570,7 +570,7 @@ require_once __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <!-- 9. БЫСТРАЯ ЗАЯВКА ИНЖЕНЕРУ КОТЕЛЬНОЙ -->
-    <section class="py-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-top: 3px solid #f59e0b;">
+    <section class="py-5 text-white" style="background: linear-gradient(135deg, #0d0f12 0%, #1c2229 100%); border-top: 3px solid #FFDF1E;">
         <div class="container">
             <div class="row align-items-center g-4">
                 <div class="col-lg-7">

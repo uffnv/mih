@@ -165,17 +165,26 @@ if (!$selected_request && !empty($requests)) {
     background-color: #f8fafc;
 }
 .mail-item.active {
-    background-color: #fffbeb;
-    border-left: 4px solid #f59e0b;
+    background-color: #FFFBEB;
+    border-left: 4px solid #FFDF1E;
 }
 .mail-item.unread {
     font-weight: 600;
 }
 .mail-reader-col {
-    padding: 2rem;
+    padding: 1.5rem 2rem;
     background-color: #ffffff;
     max-height: 720px;
     overflow-y: auto;
+}
+@media (max-width: 767.98px) {
+    .mail-reader-col {
+        padding: 1rem;
+        max-height: none;
+    }
+    .mail-list-col {
+        max-height: 360px !important;
+    }
 }
 .message-body-box {
     background: #f8fafc;

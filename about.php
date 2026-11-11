@@ -18,7 +18,7 @@ include __DIR__ . '/includes/header.php';
 
 <main style="background-color: var(--bg-page, #f8fafc);">
     <!-- Hero заголовок -->
-    <div class="py-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-bottom: 3px solid var(--bs-warning, #f59e0b);">
+    <div class="py-5 text-white" style="background: linear-gradient(135deg, #0d0f12 0%, #1c2229 100%); border-bottom: 3px solid #FFDF1E;">
         <div class="container text-center py-4">
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-shield-check me-1"></i> Официальный производитель и поставщик
@@ -168,7 +168,7 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <!-- Блок магазинов и складов со ссылкой на контакты (обе точки) -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #222830 100%); border-left: 4px solid #f59e0b;">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 text-white" style="background: linear-gradient(135deg, #0d0f12 0%, #1c2229 100%); border-left: 4px solid #FFDF1E;">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                 <div>
                     <span class="badge bg-warning text-dark text-uppercase px-3 py-1 fw-bold mb-2">Наши магазины и склады</span>

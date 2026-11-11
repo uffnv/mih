@@ -1,7 +1,7 @@
 <?php
 // includes/footer.php
 ?>
-<footer class="text-white pt-5 pb-4 mt-auto" style="background-color: #111417; border-top: 3px solid #f59e0b;">
+<footer class="text-white pt-5 pb-4 mt-auto" style="background-color: #111417; border-top: 3px solid #FFDF1E;">
     <div class="container">
         <div class="row g-4 justify-content-between">
             <!-- О компании -->
@@ -84,7 +84,7 @@
 
 <!-- 152-ФЗ Удобный компактный Cookie-виджет (Floating Toast Card в правом нижнем углу) -->
 <div id="cookieNoticeCard" class="position-fixed p-3 p-md-4 shadow-lg text-white" 
-     style="bottom: 24px; right: 24px; max-width: 380px; width: calc(100% - 48px); background: #181c20; border: 2px solid #f59e0b; border-radius: 16px; z-index: 10050; display: none; box-shadow: 0 16px 36px rgba(0,0,0,0.65) !important;">
+     style="bottom: 24px; right: 24px; max-width: 380px; width: calc(100% - 48px); background: #111417; border: 2px solid #FFDF1E; border-radius: 16px; z-index: 10050; display: none; box-shadow: 0 16px 36px rgba(0,0,0,0.65) !important;">
     <div class="d-flex align-items-center justify-content-between mb-2">
         <span class="badge bg-warning text-dark fw-bold text-uppercase px-2 py-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">
             <i class="bi bi-shield-check me-1"></i> 152-ФЗ
@@ -137,6 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- GLightbox JS -->
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<!-- Main App JS -->
+<?php $js_ver = file_exists(__DIR__ . '/../js/script.js') ? filemtime(__DIR__ . '/../js/script.js') : time(); ?>
+<script src="js/script.js?v=<?= $js_ver; ?>"></script>
 <script>
     if (typeof GLightbox !== 'undefined') {
         const lightbox = GLightbox({ selector: '.glightbox' });

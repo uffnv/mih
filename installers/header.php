@@ -8,7 +8,7 @@ require_once __DIR__ . '/../includes/config.php';
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'installer') {
     // Если пытается зайти админ - пускаем, иначе на вход
     if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')) {
-        header('Location: /auth.php');
+        header('Location: ../login.php');
         exit;
     }
 }

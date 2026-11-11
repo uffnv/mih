@@ -60,15 +60,39 @@ try {
 
     <style>
         :root {
-            --admin-sidebar-bg: #14181c;
-            --admin-accent: #f59e0b;
-            --admin-accent-hover: #d97706;
-            --admin-hover-bg: rgba(245, 158, 11, 0.12);
+            --admin-sidebar-bg: #111417;
+            --admin-accent: #FFDF1E;
+            --admin-accent-hover: #E6C500;
+            --admin-accent-text: #8A7000;
+            --admin-hover-bg: rgba(255, 223, 30, 0.12);
         }
         body {
             background-color: #f1f5f9;
             font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
             color: #1e293b;
+            overflow-x: clip;
+        }
+        .btn-warning {
+            background-color: var(--admin-accent) !important;
+            border-color: var(--admin-accent) !important;
+            color: #111417 !important;
+            font-weight: 700;
+        }
+        .btn-warning:hover, .btn-warning:focus {
+            background-color: var(--admin-accent-hover) !important;
+            border-color: var(--admin-accent-hover) !important;
+            color: #111417 !important;
+        }
+        .bg-warning {
+            background-color: var(--admin-accent) !important;
+            color: #111417 !important;
+        }
+        .text-warning {
+            color: var(--admin-accent-text) !important;
+        }
+        .sidebar .text-warning,
+        .navbar-dark .text-warning {
+            color: var(--admin-accent) !important;
         }
         .sidebar {
             min-height: 100vh;
@@ -86,6 +110,7 @@ try {
             margin: 2px 10px;
             display: flex;
             align-items: center;
+            min-height: 40px;
             transition: all 0.2s ease-in-out;
         }
         .sidebar .nav-link:hover {
@@ -94,10 +119,10 @@ try {
             transform: translateX(3px);
         }
         .sidebar .nav-link.active {
-            color: #181c20 !important;
+            color: #111417 !important;
             background-color: var(--admin-accent) !important;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+            box-shadow: 0 4px 12px rgba(255, 223, 30, 0.35);
         }
         .sidebar .nav-link i {
             margin-right: 12px;
@@ -130,18 +155,35 @@ try {
             background-color: #f8fafc;
             border-bottom: 2px solid #e2e8f0;
         }
+        @media (max-width: 767.98px) {
+            .sidebar {
+                min-height: auto;
+                position: relative;
+                z-index: 1030;
+            }
+            input.form-control, select.form-select, textarea.form-control {
+                font-size: 16px !important;
+                min-height: 44px;
+            }
+        }
     </style>
 </head>
 <body>
 
 <!-- Мобильная верхняя панель -->
-<nav class="navbar navbar-dark bg-dark d-md-none sticky-top px-3 shadow-sm">
-    <a class="navbar-brand fw-bold text-warning d-flex align-items-center gap-2" href="index.php">
-        <i class="bi bi-shield-lock-fill"></i> Админка
+<nav class="navbar navbar-dark d-md-none sticky-top px-3 shadow-sm" style="background-color: #111417; border-bottom: 2px solid #FFDF1E;">
+    <a class="navbar-brand fw-bold text-warning d-flex align-items-center gap-2 mb-0" href="index.php">
+        <img src="../images/documents/logo.jpg" alt="МП" style="height: 30px; width: auto;" class="rounded" onerror="this.style.display='none'">
+        <span>Админка</span>
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Меню">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-dark border border-warning border-opacity-50 text-warning font-monospace admin-session-timer" style="font-size: 0.75rem;" title="Оставшееся время временной сессии">
+            15:00
+        </span>
+        <button class="navbar-toggler border-secondary p-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Меню">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
 </nav>
 
 <div class="container-fluid">
@@ -149,15 +191,19 @@ try {
         <!-- Сайдбар -->
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
             <div class="position-sticky pt-3 pb-5">
-                <div class="px-3 mb-3 d-flex align-items-center gap-2 pb-3 border-bottom border-secondary border-opacity-25">
-                    <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 40px; height: 40px;">
-                        <i class="bi bi-person-fill-gear fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold text-white small">Территория Тепла</div>
-                        <div class="text-warning small" style="font-size: 0.75rem;">
+                <div class="px-3 mb-2 d-flex align-items-center gap-2 pb-3 border-bottom border-secondary border-opacity-25">
+                    <img src="../images/documents/logo.jpg" alt="Логотип" style="height: 38px; width: auto;" class="rounded shadow-sm" onerror="this.style.display='none'">
+                    <div class="min-w-0">
+                        <div class="fw-bold text-white small text-truncate">Территория Тепла</div>
+                        <div class="text-warning small text-truncate" style="font-size: 0.75rem;">
                             <?= htmlspecialchars($_SESSION['username'] ?? 'Администратор') ?>
                         </div>
+                    </div>
+                </div>
+                <div class="px-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-between rounded-3 px-2 py-1 small" style="background: rgba(255, 223, 30, 0.1); border: 1px solid rgba(255, 223, 30, 0.25);">
+                        <span class="text-white-50" style="font-size: 0.74rem;"><i class="bi bi-hourglass-split text-warning me-1"></i>Сессия:</span>
+                        <span class="fw-bold text-warning font-monospace admin-session-timer" style="font-size: 0.8rem;">15:00</span>
                     </div>
                 </div>
 

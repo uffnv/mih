@@ -23,7 +23,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <main style="background-color: var(--bg-page, #f8fafc);">
     <!-- Hero заголовок -->
-    <div class="py-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-bottom: 3px solid var(--bs-warning, #f59e0b);">
+    <div class="py-5 text-white" style="background: linear-gradient(135deg, #0d0f12 0%, #1c2229 100%); border-bottom: 3px solid #FFDF1E;">
         <div class="container text-center py-4">
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-tag-fill me-1"></i> Выгодные покупки

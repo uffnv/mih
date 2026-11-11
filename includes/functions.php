@@ -2378,4 +2378,161 @@ function safeUploadFile($file, $targetDir, $allowedExts = ['jpg', 'jpeg', 'png',
 
     return ['success' => false, 'error' => 'Не удалось переместить загруженный файл'];
 }
+
+/**
+ * ============================================================================
+ * МОДУЛЬ ВАЛИДАЦИИ ФОРМ АВТОРИЗАЦИИ И ВРЕМЕННОЙ СЕССИИ АДМИНИСТРАТОРА
+ * ============================================================================
+ */
+
+/**
+ * Безопасный старт сессии (кука закрывается при закрытии браузера)
+ */
+function startSecureAuthSession() {
+    if (session_status() === PHP_SESSION_NONE) {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? 80) == 443);
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'secure' => $isHttps,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        session_start();
+    }
+}
+
+/**
+ * Инициализация временной сессии для администратора/модератора
+ */
+function initAdminSessionMetadata() {
+    $now = time();
+    $_SESSION['admin_last_activity'] = $now;
+    $_SESSION['admin_login_time'] = $now;
+    $_SESSION['admin_ua_hash'] = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
+}
+
+/**
+ * Строгая валидация имени или фамилии (только кириллица/латиница, пробел, дефис)
+ */
+function validateHumanName($value, $label = 'Имя') {
+    $clean = trim(preg_replace('/\s+/u', ' ', (string)$value));
+    $len = function_exists('mb_strlen') ? mb_strlen($clean, 'UTF-8') : strlen($clean);
+
+    if ($len < 2 || $len > 50) {
+        return ['valid' => false, 'value' => $clean, 'error' => "$label должно содержать от 2 до 50 букв."];
+    }
+    if (!preg_match('/^[А-Яа-яЁёA-Za-z]+([ -][А-Яа-яЁёA-Za-z]+)*$/u', $clean)) {
+        return ['valid' => false, 'value' => $clean, 'error' => "$label может содержать только буквы, пробел и дефис (без цифр и символов)."];
+    }
+    return ['valid' => true, 'value' => $clean, 'error' => null];
+}
+
+/**
+ * Строгая валидация логина или Email при входе
+ */
+function validateLoginIdentifier($value) {
+    $clean = trim((string)$value);
+    if (strlen($clean) < 3 || strlen($clean) > 100) {
+        return ['valid' => false, 'value' => $clean, 'error' => 'Логин или Email должен содержать от 3 до 100 символов.'];
+    }
+    if (!preg_match('/^[A-Za-z0-9@._+-]{3,100}$/', $clean)) {
+        return ['valid' => false, 'value' => $clean, 'error' => 'Для логина и Email допустимы только латинские буквы, цифры и символы @ . _ + - (без пробелов).'];
+    }
+    return ['valid' => true, 'value' => $clean, 'error' => null];
+}
+
+/**
+ * Строгая валидация Email при регистрации
+ */
+function validateEmailStrict($value) {
+    $clean = strtolower(trim((string)$value));
+    if (strlen($clean) < 5 || strlen($clean) > 100) {
+        return ['valid' => false, 'value' => $clean, 'error' => 'Некорректная длина Email адреса.'];
+    }
+    if (!preg_match('/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/', $clean) || !filter_var($clean, FILTER_VALIDATE_EMAIL)) {
+        return ['valid' => false, 'value' => $clean, 'error' => 'Введите корректный Email латинскими буквами (например, name@example.ru).'];
+    }
+    return ['valid' => true, 'value' => $clean, 'error' => null];
+}
+
+/**
+ * Нормализация и строгая валидация телефона РФ: +7 (XXX) XXX-XX-XX
+ */
+function normalizeAndValidatePhone($value) {
+    $digits = preg_replace('/\D/', '', (string)$value);
+    if (strlen($digits) === 10) {
+        $digits = '7' . $digits;
+    } elseif (strlen($digits) === 11 && $digits[0] === '8') {
+        $digits = '7' . substr($digits, 1);
+    }
+
+    if (!preg_match('/^7\d{10}$/', $digits)) {
+        return ['valid' => false, 'value' => (string)$value, 'error' => 'Введите 11 цифр российского номера в формате +7 (XXX) XXX-XX-XX.'];
+    }
+
+    $body = substr($digits, 1);
+    if (preg_match('/^(\d)\1{9}$/', $body)) {
+        return ['valid' => false, 'value' => (string)$value, 'error' => 'Укажите действующий номер телефона (повторяющиеся цифры не допускаются).'];
+    }
+
+    $formatted = sprintf(
+        '+7 (%s) %s-%s-%s',
+        substr($digits, 1, 3),
+        substr($digits, 4, 3),
+        substr($digits, 7, 2),
+        substr($digits, 9, 2)
+    );
+    return ['valid' => true, 'value' => $formatted, 'error' => null];
+}
+
+/**
+ * Строгая проверка пароля при регистрации (видимые ASCII, без пробелов/кириллицы, буквы + цифры)
+ */
+function validatePasswordRegistration($password) {
+    $pass = (string)$password;
+    $len = strlen($pass);
+    if ($len < 6 || $len > 64) {
+        return ['valid' => false, 'error' => 'Пароль должен содержать от 6 до 64 символов.'];
+    }
+    if (!preg_match('/^[\x21-\x7E]+$/', $pass)) {
+        return ['valid' => false, 'error' => 'Пароль может содержать только латинские буквы, цифры и спецсимволы (без пробелов и русских букв).'];
+    }
+    if (!preg_match('/[A-Za-z]/', $pass) || !preg_match('/\d/', $pass)) {
+        return ['valid' => false, 'error' => 'Пароль должен включать минимум одну латинскую букву и одну цифру.'];
+    }
+    return ['valid' => true, 'error' => null];
+}
+
+/**
+ * Генерация гарантированно уникального username из Email
+ */
+function generateUniqueUsernameFromEmail($email) {
+    global $pdo;
+    $prefix = explode('@', $email)[0] ?? 'user';
+    $base = preg_replace('/[^A-Za-z0-9_.-]/', '', $prefix);
+    if (strlen($base) < 3) {
+        $base = 'user_' . substr(md5($email), 0, 6);
+    }
+    $base = substr($base, 0, 38);
+    $candidate = $base;
+
+    try {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
+        $i = 1;
+        while (true) {
+            $stmt->execute([$candidate]);
+            if (!$stmt->fetch()) {
+                return $candidate;
+            }
+            $candidate = $base . '_' . ($i === 1 ? random_int(10, 99) : $i);
+            $i++;
+            if ($i > 20) {
+                return $base . '_' . bin2hex(random_bytes(3));
+            }
+        }
+    } catch (Throwable $e) {
+        return $base . '_' . random_int(100, 999);
+    }
+}
 ?>

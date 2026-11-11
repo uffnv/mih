@@ -15,10 +15,10 @@ http_response_code(500);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --brand-dark: #181c20;
-            --brand-amber: #f59e0b;
-            --brand-amber-hover: #d97706;
-            --text-primary: #181c20;
+            --brand-dark: #111417;
+            --brand-amber: #FFDF1E;
+            --brand-amber-hover: #E6C500;
+            --text-primary: #111417;
             --text-secondary: #64748b;
             --bg-page: #f8fafc;
         }

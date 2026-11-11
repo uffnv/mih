@@ -59,9 +59,9 @@ try {
     <meta charset="UTF-8">
     <title>Диагностика сервера — Территория Тепла</title>
     <style>
-        body { font-family: monospace; padding: 2rem; background: #181c20; color: #f8fafc; }
-        .card { background: #22272e; border: 1px solid #374151; border-radius: 8px; padding: 1.5rem; max-width: 600px; margin: 0 auto; }
-        h2 { color: #f59e0b; margin-top: 0; }
+        body { font-family: monospace; padding: 2rem; background: #111417; color: #f8fafc; }
+        .card { background: #181c20; border: 1px solid #374151; border-radius: 8px; padding: 1.5rem; max-width: 600px; margin: 0 auto; }
+        h2 { color: #FFDF1E; margin-top: 0; }
         .ok { color: #10b981; font-weight: bold; }
         .err { color: #ef4444; font-weight: bold; }
         ul { list-style: none; padding: 0; }

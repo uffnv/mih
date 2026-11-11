@@ -61,11 +61,14 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
     <!-- Надежный инженерный стиль (v3.2 с динамическим Cache-Busting) -->
     <link rel="stylesheet" href="css/style.css?v=<?= $css_version; ?>">
     
-    <!-- Critical CSS: железобетонная фиксация контраста шапки и ключевых стилей -->
+    <!-- Critical CSS: железобетонная фиксация контраста шапки и ключевых стилей (палитра логотипа #FFDF1E) -->
     <style>
         :root {
-            --bs-warning: #f59e0b;
-            --bs-warning-hover: #d97706;
+            --brand-yellow: #FFDF1E;
+            --brand-yellow-hover: #E6C500;
+            --brand-yellow-text: #8A7000;
+            --bs-warning: #FFDF1E;
+            --bs-warning-hover: #E6C500;
             --dark-main: #181c20;
             --dark-surface: #222830;
             --status-stock: #10b981;
@@ -86,8 +89,8 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             font-size: 0.83rem;
         }
         .main-header {
-            background-color: #181c20 !important;
-            border-bottom: 2px solid #f59e0b !important;
+            background-color: #111417 !important;
+            border-bottom: 2px solid #FFDF1E !important;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
         /* Высокий контраст заголовков в темных блоках */
@@ -104,7 +107,7 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             line-height: 1.1;
         }
         .navbar-brand .brand-sub {
-            color: #f59e0b !important;
+            color: #FFDF1E !important;
             font-size: 0.68rem;
             letter-spacing: 1.2px;
             text-transform: uppercase;
@@ -119,13 +122,13 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             border-radius: 6px;
         }
         .main-nav-link:hover {
-            color: #f59e0b !important;
+            color: #FFDF1E !important;
             background: rgba(255, 255, 255, 0.06);
         }
         .main-nav-link.active-page {
-            color: #ffffff !important;
+            color: #FFDF1E !important;
             font-weight: 700;
-            background: rgba(245, 158, 11, 0.16) !important;
+            background: rgba(255, 223, 30, 0.14) !important;
             border: none !important;
             border-bottom: none !important;
         }
@@ -133,9 +136,9 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             display: none !important;
         }
         .hero-engineering {
-            background: linear-gradient(135deg, #121518 0%, #1a2027 50%, #242c35 100%) !important;
+            background: linear-gradient(135deg, #0d0f12 0%, #161a20 55%, #20262e 100%) !important;
             position: relative;
-            border-bottom: 3px solid #f59e0b;
+            border-bottom: 3px solid #FFDF1E;
             overflow: hidden;
         }
         .feature-card {
@@ -150,7 +153,7 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
         .feature-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
-            border-left: 3px solid #f59e0b;
+            border-left: 3px solid #FFDF1E;
         }
         .category-card {
             background: #ffffff;
@@ -167,15 +170,16 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
         .category-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
-            border-color: #f59e0b;
+            border-color: #FFDF1E;
         }
         .category-icon {
             width: 60px;
             height: 60px;
             margin: 0 auto 1rem;
             border-radius: 50%;
-            background: #fffbeb;
-            color: #d97706;
+            background: #FFF9D6;
+            color: #8A7000;
+            border: 1px solid rgba(255, 223, 30, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -183,8 +187,8 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             transition: all 0.2s ease;
         }
         .category-card:hover .category-icon {
-            background: #f59e0b;
-            color: #181c20;
+            background: #FFDF1E;
+            color: #111417;
             transform: scale(1.08);
         }
         .product-card {
@@ -250,12 +254,12 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
 
 <!-- 1. ВЕРХНЯЯ ИНФОРМАЦИОННАЯ ПЛАШКА -->
 <div class="header-top-bar py-1" style="background-color: #111417 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; color: #cbd5e1 !important;">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-3">
-            <span><i class="bi bi-geo-alt-fill text-warning me-1"></i> с. Майма, ул. Энергетиков, д. 24</span>
+    <div class="container d-flex justify-content-between align-items-center gap-2">
+        <div class="d-flex align-items-center gap-3 text-truncate">
+            <span class="text-truncate"><i class="bi bi-geo-alt-fill text-warning me-1"></i> с. Майма<span class="d-none d-sm-inline">, ул. Энергетиков, д. 24</span></span>
             <span class="d-none d-md-inline"><i class="bi bi-clock-fill text-warning me-1"></i> Пн–Сб: 09:00 – 18:00</span>
         </div>
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center flex-shrink-0">
             <a href="tel:+79136914443" class="text-decoration-none fw-bold text-white d-inline-flex align-items-center">
                 <i class="bi bi-telephone-fill text-warning me-1"></i> +7 (913) 691-44-43
             </a>
@@ -264,21 +268,29 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
 </div>
 
 <!-- 2. ОСНОВНАЯ ШАПКА САЙТА -->
-<header class="sticky-top main-header" style="background-color: #181c20 !important; border-bottom: 2px solid #f59e0b !important;">
-    <nav class="navbar navbar-expand-lg navbar-dark container py-2" style="background-color: #181c20 !important;">
+<header class="sticky-top main-header" style="background-color: #111417 !important; border-bottom: 2px solid #FFDF1E !important;">
+    <nav class="navbar navbar-expand-lg navbar-dark container py-2" style="background-color: #111417 !important;">
         <!-- Логотип -->
-        <a class="navbar-brand text-uppercase d-flex align-items-center text-decoration-none" href="index.php">
+        <a class="navbar-brand text-uppercase d-flex align-items-center text-decoration-none me-auto" href="index.php">
             <img src="images/documents/logo.jpg" alt="Логотип" style="height: 44px; width: auto; object-fit: contain;" class="me-2 rounded shadow-sm" onerror="this.style.display='none'">
             <div>
                 <span class="brand-title d-block" style="color: #ffffff !important; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em;">ТЕРРИТОРИЯ ТЕПЛА</span>
-                <span class="brand-sub d-block" style="color: #f59e0b !important; font-size: 0.68rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;">Отопительное оборудование</span>
+                <span class="brand-sub d-block" style="color: #FFDF1E !important; font-size: 0.68rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;">Отопительное оборудование</span>
             </div>
         </a>
 
-        <!-- Мобильное меню (гамбургер) -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Меню">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- Мобильные быстрые действия (Корзина в 1 тап + Гамбургер) -->
+        <div class="d-flex d-lg-none align-items-center gap-2">
+            <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-2 px-sm-3 fw-bold position-relative d-inline-flex align-items-center shadow-sm" style="background-color: #FFDF1E; border: none; color: #111417; min-height: 38px;" aria-label="Корзина">
+                <i class="bi bi-cart3 fs-6"></i>
+                <span class="badge rounded-pill ms-1 cart-count-sync" style="background: #111417; color: #FFDF1E; font-size: 0.72rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
+                    <?= (int)$cart_count ?>
+                </span>
+            </a>
+            <button class="navbar-toggler border border-secondary border-opacity-50 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Меню">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
 
         <!-- Навигация -->
         <div class="collapse navbar-collapse" id="mainNav">
@@ -321,9 +333,9 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
             </ul>
 
             <!-- Действия: Кабинет и Корзина -->
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 header-actions-collapse">
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="admin/index.php" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35);">
+                    <a href="admin/index.php" class="btn btn-sm rounded-pill px-3 fw-semibold text-warning" style="background: rgba(255, 223, 30, 0.12); border: 1px solid rgba(255, 223, 30, 0.4);">
                         <i class="bi bi-shield-lock-fill me-1"></i> Панель управления
                     </a>
                 <?php elseif (isset($_SESSION['user_id'])): ?>
@@ -331,15 +343,15 @@ $css_version = file_exists(__DIR__ . '/../css/style.css') ? filemtime(__DIR__ . 
                         <i class="bi bi-person-circle me-1 text-warning"></i> <?= htmlspecialchars($cabinet_title) ?>
                     </a>
                 <?php else: ?>
-                    <a href="login.php" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-medium text-white-50 hover-white" style="border-color: rgba(255,255,255,0.18);">
+                    <a href="login.php" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-medium text-white hover-white" style="border-color: rgba(255,255,255,0.22);">
                         <i class="bi bi-person me-1 text-warning"></i> Войти
                     </a>
                 <?php endif; ?>
 
-                <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold position-relative d-inline-flex align-items-center shadow-sm" style="background-color: #f59e0b; border: none; color: #181c20;">
+                <a href="cart.php" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold position-relative d-none d-lg-inline-flex align-items-center shadow-sm" style="background-color: #FFDF1E; border: none; color: #111417;">
                     <i class="bi bi-cart3 fs-6 me-1"></i>
                     <span>Корзина</span>
-                    <span id="cart-count-badge" class="badge rounded-pill ms-2" style="background: #181c20; color: #f59e0b; font-size: 0.75rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
+                    <span id="cart-count-badge" class="badge rounded-pill ms-2 cart-count-sync" style="background: #111417; color: #FFDF1E; font-size: 0.75rem; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
                         <?= (int)$cart_count ?>
                     </span>
                 </a>

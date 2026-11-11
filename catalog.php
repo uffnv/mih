@@ -98,11 +98,20 @@ require_once __DIR__ . '/includes/header.php';
             </ol>
         </nav>
 
-        <div class="row g-4">
+        <div class="row g-3 g-lg-4">
             <!-- Сайдбар фильтров -->
             <div class="col-lg-3">
+                <!-- Мобильная кнопка открытия фильтров -->
+                <div class="d-lg-none mb-2">
+                    <button class="btn btn-dark w-100 d-flex justify-content-between align-items-center rounded-4 py-2 px-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#catalogFiltersCollapse" aria-expanded="false" aria-controls="catalogFiltersCollapse">
+                        <span class="fw-bold"><i class="bi bi-sliders text-warning me-2"></i> Категории и фильтры</span>
+                        <span class="badge bg-warning text-dark rounded-pill"><?= count($products); ?></span>
+                    </button>
+                </div>
+
+                <div class="collapse d-lg-block" id="catalogFiltersCollapse">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden sticky-lg-top" style="top: 85px; z-index: 10;">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background: var(--dark-main, #181c20); color: #fff;">
+                    <div class="card-header py-3 d-none d-lg-flex justify-content-between align-items-center" style="background: #111417; color: #fff;">
                         <span class="fw-bold"><i class="bi bi-grid-fill text-warning me-2"></i> Категории</span>
                         <span class="badge bg-warning text-dark"><?= count($products); ?> тов.</span>
                     </div>
@@ -166,6 +175,7 @@ require_once __DIR__ . '/includes/header.php';
                             <span>+7 (913) 691-44-43</span>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
 
@@ -259,7 +269,7 @@ require_once __DIR__ . '/includes/header.php';
                                                 <a href="product.php?id=<?= $prod['id']; ?>" class="btn btn-outline-dark btn-sm flex-fill fw-semibold rounded-pill">
                                                     Обзор
                                                 </a>
-                                                <button class="btn btn-warning btn-sm fw-bold rounded-pill px-3 shadow-sm add-to-cart-btn" data-product-id="<?= $prod['id']; ?>" title="В корзину">
+                                                <button type="button" class="btn btn-warning btn-sm fw-bold rounded-pill px-3 shadow-sm add-to-cart" data-product-id="<?= $prod['id']; ?>" title="В корзину">
                                                     <i class="bi bi-cart-plus-fill"></i>
                                                 </button>
                                             </div>
@@ -285,45 +295,5 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 </main>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const prodId = this.dataset.productId;
-            const originalHtml = this.innerHTML;
-            this.disabled = true;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
-
-            fetch('ajax/cart_add.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'product_id=' + prodId + '&quantity=1'
-            })
-            .then(res => res.json())
-            .then(data => {
-                this.disabled = false;
-                this.innerHTML = originalHtml;
-                if (data.status === 'success') {
-                    const badge = document.getElementById('cart-count-badge');
-                    if (badge) {
-                        badge.innerText = data.cart_count;
-                        badge.style.display = 'inline-block';
-                    }
-                    showToast('Товар успешно добавлен в корзину!', 'success');
-                } else {
-                    showToast(data.message || 'Ошибка добавления', 'danger');
-                }
-            })
-            .catch(err => {
-                this.disabled = false;
-                this.innerHTML = originalHtml;
-                showToast('Ошибка связи с сервером', 'danger');
-            });
-        });
-    });
-});
-</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

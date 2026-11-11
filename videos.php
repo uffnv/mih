@@ -16,7 +16,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <main style="background-color: var(--bg-page, #f8fafc);">
     <!-- Hero заголовок -->
-    <div class="py-5 text-white" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-bottom: 3px solid var(--bs-warning, #f59e0b);">
+    <div class="py-5 text-white" style="background: linear-gradient(135deg, #0d0f12 0%, #1c2229 100%); border-bottom: 3px solid #FFDF1E;">
         <div class="container text-center py-4">
             <span class="badge bg-warning text-dark text-uppercase px-3 py-2 fw-bold mb-3 shadow-sm">
                 <i class="bi bi-play-circle-fill me-1"></i> Практические обзоры
@@ -71,7 +71,7 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <!-- Баннер подбора оборудования -->
-        <div class="mt-5 p-4 p-md-5 rounded-4 shadow-sm text-white text-center text-md-start d-flex flex-column flex-md-row align-items-center justify-content-between gap-4" style="background: linear-gradient(135deg, #181c20 0%, #2b3238 100%); border-left: 4px solid #f59e0b;">
+        <div class="mt-5 p-4 p-md-5 rounded-4 shadow-sm text-white text-center text-md-start d-flex flex-column flex-md-row align-items-center justify-content-between gap-4" style="background: linear-gradient(135deg, #0d0f12 0%, #1c2229 100%); border-left: 4px solid #FFDF1E;">
             <div>
                 <h4 class="fw-bold text-white mb-2">Нужна консультация по видео или расчет дымохода?</h4>
                 <p class="text-white-50 mb-0 small">

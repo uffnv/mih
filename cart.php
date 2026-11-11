@@ -55,9 +55,9 @@ require_once __DIR__ . '/includes/header.php';
                 <!-- Список товаров -->
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-3">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead style="background: var(--dark-main, #181c20); color: #fff;">
+                        <div class="table-responsive-md">
+                            <table class="table table-hover align-middle mb-0 cart-table">
+                                <thead style="background: #111417; color: #fff;">
                                     <tr>
                                         <th class="ps-4 py-3 border-0">Товар</th>
                                         <th class="text-center py-3 border-0">Цена</th>
@@ -76,14 +76,17 @@ require_once __DIR__ . '/includes/header.php';
                                             <div class="d-flex align-items-center">
                                                 <a href="product.php?id=<?= $item['id'] ?>" class="me-3 flex-shrink-0">
                                                     <img src="<?= htmlspecialchars($itemImg) ?>" 
-                                                         style="width: 72px; height: 72px; object-fit: contain;" 
+                                                         style="width: 68px; height: 68px; object-fit: contain;" 
                                                          class="rounded-3 border p-1 bg-white" 
                                                          alt="<?= htmlspecialchars($item['name']) ?>">
                                                 </a>
-                                                <div>
+                                                <div class="min-w-0">
                                                     <a href="product.php?id=<?= $item['id'] ?>" class="fw-bold text-dark text-decoration-none d-block mb-1">
                                                         <?= htmlspecialchars($item['name']) ?>
                                                     </a>
+                                                    <span class="d-md-none text-muted small d-block mb-1">
+                                                        Цена: <?= number_format($item['price'], 0, '.', ' ') ?> ₽/шт.
+                                                    </span>
                                                     <?php if (!empty($item['sku'])): ?>
                                                         <span class="badge bg-light text-muted border small">
                                                             Арт: <?= htmlspecialchars($item['sku']) ?>
@@ -209,12 +212,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const totalEl = document.getElementById('total-sum');
                 if (totalEl) totalEl.innerText = new Intl.NumberFormat('ru-RU').format(res.total_price) + ' ₽';
                 
-                // Обновляем счетчик в шапке
-                const badge = document.getElementById('cart-count-badge');
-                if (badge) {
+                // Обновляем счетчики в шапке (десктоп + мобильная кнопка)
+                document.querySelectorAll('#cart-count-badge, .cart-count-sync').forEach(badge => {
                     badge.innerText = res.cart_count;
                     badge.style.display = res.cart_count > 0 ? 'inline-block' : 'none';
-                }
+                });
             } else {
                 alert(res.message || 'Ошибка обновления корзины');
             }
